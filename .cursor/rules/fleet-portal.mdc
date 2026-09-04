@@ -13,11 +13,15 @@ alwaysApply: true
 
 - Репозиторий всего воркспейса (не только fleet-portal) запушен на GitHub:
   **https://github.com/alexsntu/AlexTsar** (ветка `main`).
-- Пуш идёт через выделенный SSH-ключ `~/.ssh/id_ed25519_alextsar`, алиас в
-  `~/.ssh/config` — `Host github.com-alextsar` (через порт 443,
-  `HostName ssh.github.com` — прямой порт 22 в этой сети иногда подвисает,
-  порт 443 надёжнее). Remote `origin` уже настроен на
-  `git@github.com-alextsar:alexsntu/AlexTsar.git`.
+- `origin` настроен на HTTPS (`https://github.com/alexsntu/AlexTsar.git`) с
+  авторизацией через `gh` (`gh auth setup-git`) — это надёжно работает из
+  текущей рабочей среды. Есть также выделенный SSH-ключ
+  `~/.ssh/id_ed25519_alextsar` (зарегистрирован на GitHub, алиас
+  `Host github.com-alextsar` в `~/.ssh/config`, через порт 443 —
+  `HostName ssh.github.com`, т.к. прямой порт 22 из этой среды иногда
+  недоступен) — SSH-туннель здесь бывает нестабилен (зависает), поэтому для
+  пуша из этой среды используем HTTPS; SSH-ключ можно использовать при работе
+  напрямую с VPS или другого окружения без этих сетевых ограничений.
 - `gh` CLI авторизован под аккаунтом `alexsntu` (есть scope `admin:public_key`
   для управления SSH-ключами через `gh ssh-key add/list`).
 - `.env` с паролями и клон `frappe_docker/` — в `.gitignore`, в репозиторий не
