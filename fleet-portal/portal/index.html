@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Портал автопарка</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --card-hover: #1e222b;
+    --border: #2a2f3a;
+    --text: #e6e8eb;
+    --text-dim: #9aa1ac;
+    --accent: #4f8cff;
+    --accent-2: #34c77b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .wrap { max-width: 920px; width: 100%; }
+  header { text-align: center; margin-bottom: 40px; }
+  h1 { font-size: 28px; font-weight: 600; margin: 0 0 8px; }
+  header p { color: var(--text-dim); margin: 0; font-size: 15px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  a.card {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  a.card:hover {
+    background: var(--card-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .card .tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 14px;
+  }
+  .card.lube .tag { color: var(--accent-2); border-color: var(--accent-2); }
+  .card h2 { font-size: 19px; margin: 0 0 8px; }
+  .card p { font-size: 14px; color: var(--text-dim); margin: 0; line-height: 1.5; }
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  footer code {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Портал автопарка</h1>
+      <p>Учёт перевозок, грузов, ТО, ремонтов и топлива — в одном месте</p>
+    </header>
+
+    <div class="grid">
+      <a class="card erp" id="erp-link" href="#">
+        <span class="tag">ERPNext + vsd_fleet_ms</span>
+        <h2>Логистика и грузы</h2>
+        <p>Рейсы, маршруты, водители, тягачи и прицепы, заявки на топливо, техосмотры, ТТН и акты выполненных работ, бухгалтерия.</p>
+      </a>
+
+      <a class="card lube" id="lube-link" href="#">
+        <span class="tag">LubeLogger</span>
+        <h2>ТО, ремонты, пробег</h2>
+        <p>История обслуживания и ремонтов по каждой машине, топливные заправки и расход, напоминания о плановом ТО по пробегу и датам.</p>
+      </a>
+    </div>
+
+    <footer>
+      Локальный стенд · <code id="host-label"></code>
+    </footer>
+  </div>
+
+  <script>
+    // Локально (MacBook): сервисы на отдельных портах.
+    // На VPS за Traefik (см. docker-compose.vps.yml): поддомены erp./garage.
+    var host = window.location.hostname;
+    var proto = window.location.protocol;
+    var port = window.location.port;
+    var erpHref, lubeHref;
+    if (port) {
+      erpHref = proto + "//" + host + ":8000";
+      lubeHref = proto + "//" + host + ":8181";
+    } else {
+      erpHref = proto + "//erp." + host;
+      lubeHref = proto + "//garage." + host;
+    }
+    document.getElementById("erp-link").href = erpHref;
+    document.getElementById("lube-link").href = lubeHref;
+    document.getElementById("host-label").textContent = host + (port ? ":" + port : "");
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# секреты
+fleet-portal/.env
+
+# клон frappe_docker используется только для сборки образа (см. fleet-portal/BUILD.md)
+fleet-portal/frappe_docker/
+
+# служебное
+.DS_Store
+*.log

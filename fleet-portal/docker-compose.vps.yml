@@ -1,0 +1,64 @@
+# Оверлей для VPS: Traefik + Let's Encrypt + реальные домены.
+# Использовать вместе с основным файлом:
+#
+#   docker compose -p fleet -f docker-compose.yml -f docker-compose.vps.yml up -d
+#
+# Перед запуском добавьте в .env:
+#   DOMAIN=example.ru
+#   ACME_EMAIL=you@example.ru
+#
+# И настройте DNS A-записи (на IP вашего VPS):
+#   example.ru          -> портал (лендинг со ссылками)
+#   erp.example.ru      -> ERPNext
+#   garage.example.ru   -> LubeLogger
+
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-letsencrypt:/letsencrypt
+
+  frontend:
+    ports: []
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.erp.rule=Host(`erp.${DOMAIN}`)
+      - traefik.http.routers.erp.entrypoints=websecure
+      - traefik.http.routers.erp.tls.certresolver=le
+      - traefik.http.services.erp.loadbalancer.server.port=8080
+
+  lubelogger:
+    ports: []
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.garage.rule=Host(`garage.${DOMAIN}`)
+      - traefik.http.routers.garage.entrypoints=websecure
+      - traefik.http.routers.garage.tls.certresolver=le
+      - traefik.http.services.garage.loadbalancer.server.port=8080
+
+  portal:
+    ports: []
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portal.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.portal.entrypoints=websecure
+      - traefik.http.routers.portal.tls.certresolver=le
+      - traefik.http.services.portal.loadbalancer.server.port=80
+
+volumes:
+  traefik-letsencrypt:
