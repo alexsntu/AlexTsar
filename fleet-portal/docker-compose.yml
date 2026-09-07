@@ -1,130 +1,21 @@
-x-frappe-image: &frappe_image
-  image: ${CUSTOM_IMAGE:-fleet-portal-erpnext}:${CUSTOM_TAG:-latest}
-  pull_policy: never
-
-x-depends-on-configurator: &depends_on_configurator
-  depends_on:
-    configurator:
-      condition: service_completed_successfully
-
-x-backend-defaults: &backend_defaults
-  <<: [*frappe_image, *depends_on_configurator]
-  restart: unless-stopped
-  volumes:
-    - sites:/home/frappe/frappe-bench/sites
-    - logs:/home/frappe/frappe-bench/logs
-
 services:
-  # ---------- База данных и очереди ----------
-  mariadb:
-    image: mariadb:11.8
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 5s
-      interval: 5s
-      timeout: 5s
-      retries: 10
+  # ---------- Fleet App: топливо, рейсы, задания водителям ----------
+  fleet-app:
+    build:
+      context: ./app
+    image: fleet-app:${FLEET_APP_TAG:-latest}
+    pull_policy: never
     restart: unless-stopped
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MARIADB_AUTO_UPGRADE: "1"
+      DATABASE_URL: file:/data/fleet.db
+      JWT_SECRET: ${FLEET_JWT_SECRET}
+      ADMIN_EMAIL: ${FLEET_ADMIN_EMAIL:-admin@fleet.local}
+      ADMIN_PASSWORD: ${FLEET_ADMIN_PASSWORD}
+      NODE_ENV: production
     volumes:
-      - mariadb-data:/var/lib/mysql
-
-  redis-cache:
-    image: redis:7-alpine
-    restart: unless-stopped
-
-  redis-queue:
-    image: redis:7-alpine
-    restart: unless-stopped
-    volumes:
-      - redis-queue-data:/data
-
-  # ---------- Frappe/ERPNext (+ vsd_fleet_ms) ----------
-  configurator:
-    <<: *frappe_image
-    entrypoint:
-      - bash
-      - -c
-    command:
-      - >
-        ls -1 apps > sites/apps.txt;
-        bench set-config -g db_host $$DB_HOST;
-        bench set-config -gp db_port $$DB_PORT;
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
-    environment:
-      DB_HOST: mariadb
-      DB_PORT: "3306"
-      REDIS_CACHE: redis-cache:6379
-      REDIS_QUEUE: redis-queue:6379
-      SOCKETIO_PORT: "9000"
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-      - logs:/home/frappe/frappe-bench/logs
-    depends_on:
-      mariadb:
-        condition: service_healthy
-      redis-cache:
-        condition: service_started
-      redis-queue:
-        condition: service_started
-    restart: "no"
-
-  backend:
-    <<: *backend_defaults
-    environment:
-      GUNICORN_THREADS: "4"
-      GUNICORN_WORKERS: "2"
-      GUNICORN_TIMEOUT: "120"
-
-  websocket:
-    <<: *backend_defaults
-    command:
-      - node
-      - /home/frappe/frappe-bench/apps/frappe/socketio.js
-
-  queue-short:
-    <<: *backend_defaults
-    command: bench worker --queue short,default
-
-  queue-long:
-    <<: *backend_defaults
-    command: bench worker --queue long,default,short
-
-  scheduler:
-    <<: *backend_defaults
-    command: bench schedule
-
-  frontend:
-    <<: *frappe_image
-    restart: unless-stopped
-    command:
-      - nginx-entrypoint.sh
-    environment:
-      BACKEND: backend:8000
-      SOCKETIO: websocket:9000
-      FRAPPE_SITE_NAME_HEADER: ${SITE_NAME:-frontend}
-      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
-      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
-      UPSTREAM_REAL_IP_RECURSIVE: "off"
-      PROXY_READ_TIMEOUT: "120"
-      CLIENT_MAX_BODY_SIZE: 50m
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-      - logs:/home/frappe/frappe-bench/logs
-    depends_on:
-      - backend
-      - websocket
+      - fleet-app-data:/data
     ports:
-      - "${ERP_HTTP_PORT:-8000}:8080"
+      - "${FLEET_APP_HTTP_PORT:-8000}:3000"
 
   # ---------- LubeLogger: ТО, ремонты, топливо, пробег ----------
   lubelogger:
@@ -146,9 +37,6 @@ services:
       - "${PORTAL_HTTP_PORT:-8888}:80"
 
 volumes:
-  mariadb-data:
-  redis-queue-data:
-  sites:
-  logs:
+  fleet-app-data:
   lubelogger-data:
   lubelogger-keys:

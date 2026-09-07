@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/public
+server/*.db
+server/*.db-journal
+server/.env
+server/.env.local
+**/.git

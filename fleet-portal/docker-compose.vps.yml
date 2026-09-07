@@ -9,7 +9,7 @@
 #
 # И настройте DNS A-записи (на IP вашего VPS):
 #   example.ru          -> портал (лендинг со ссылками)
-#   erp.example.ru      -> ERPNext
+#   app.example.ru      -> Fleet App (топливо, рейсы)
 #   garage.example.ru   -> LubeLogger
 
 services:
@@ -33,14 +33,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-letsencrypt:/letsencrypt
 
-  frontend:
+  fleet-app:
     ports: []
     labels:
       - traefik.enable=true
-      - traefik.http.routers.erp.rule=Host(`erp.${DOMAIN}`)
-      - traefik.http.routers.erp.entrypoints=websecure
-      - traefik.http.routers.erp.tls.certresolver=le
-      - traefik.http.services.erp.loadbalancer.server.port=8080
+      - traefik.http.routers.fleet-app.rule=Host(`app.${DOMAIN}`)
+      - traefik.http.routers.fleet-app.entrypoints=websecure
+      - traefik.http.routers.fleet-app.tls.certresolver=le
+      - traefik.http.services.fleet-app.loadbalancer.server.port=3000
 
   lubelogger:
     ports: []

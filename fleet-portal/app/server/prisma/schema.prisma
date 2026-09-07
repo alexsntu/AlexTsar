@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite не поддерживает нативные enum — роли и статусы храним как String
+// и валидируем на уровне приложения (см. src/types.ts, zod-схемы в модулях).
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  role         String
+  isActive     Boolean  @default(true)
+  driverId     Int?     @unique
+  driver       Driver?  @relation(fields: [driverId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model Driver {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  phone     String?
+  isActive  Boolean  @default(true)
+  user      User?
+  trips     Trip[]
+  createdAt DateTime @default(now())
+}
+
+model Truck {
+  id                   Int                 @id @default(autoincrement())
+  name                 String
+  plateNumber          String
+  capacityTons         Float?
+  normConsumptionMin   Float?
+  normConsumptionMax   Float?
+  serviceIntervalKm    Float?
+  serviceIntervalDays  Int?
+  lastServiceDate      DateTime?
+  lastServiceOdometer  Float?
+  isActive             Boolean             @default(true)
+  trips                Trip[]
+  withdrawals          FuelWithdrawal[]
+  maintenanceRecords   MaintenanceRecord[]
+  createdAt            DateTime            @default(now())
+}
+
+model FuelType {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  isActive    Boolean          @default(true)
+  lots        FuelLot[]
+  withdrawals FuelWithdrawal[]
+  createdAt   DateTime         @default(now())
+}
+
+model FuelLot {
+  id               Int      @id @default(autoincrement())
+  fuelType         FuelType @relation(fields: [fuelTypeId], references: [id])
+  fuelTypeId       Int
+  date             DateTime
+  litersIn         Float
+  litersRemaining  Float
+  pricePerLiter    Float
+  totalAmount      Float
+  supplier         String?
+  comment          String?
+  createdBy        Int
+  createdAt        DateTime @default(now())
+  usages           FuelWithdrawalLotUsage[]
+
+  @@index([fuelTypeId, date])
+}
+
+model FuelWithdrawal {
+  id              Int      @id @default(autoincrement())
+  fuelType        FuelType @relation(fields: [fuelTypeId], references: [id])
+  fuelTypeId      Int
+  date            DateTime
+  liters          Float
+  isPersonal      Boolean  @default(false)
+  truck           Truck?   @relation(fields: [truckId], references: [id])
+  truckId         Int?
+  odometer        Float?
+  personalComment String?
+  totalCost       Float
+  createdBy       Int
+  createdAt       DateTime @default(now())
+  tripId          Int?
+  trip            Trip?    @relation(fields: [tripId], references: [id])
+  lotUsages       FuelWithdrawalLotUsage[]
+
+  @@index([date, fuelTypeId, truckId])
+}
+
+model FuelWithdrawalLotUsage {
+  id                 Int            @id @default(autoincrement())
+  withdrawal         FuelWithdrawal @relation(fields: [withdrawalId], references: [id])
+  withdrawalId       Int
+  lot                FuelLot        @relation(fields: [lotId], references: [id])
+  lotId              Int
+  litersUsed         Float
+  pricePerLiterAtUse Float
+}
+
+model Trip {
+  date            DateTime
+  id              Int              @id @default(autoincrement())
+  driver          Driver           @relation(fields: [driverId], references: [id])
+  driverId        Int
+  truck           Truck            @relation(fields: [truckId], references: [id])
+  truckId         Int
+  routeFrom       String
+  routeTo         String
+  cargoDescription String?
+  cargoJson       String?
+  status          String           @default("ASSIGNED")
+  createdBy       Int
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  fuelWithdrawals FuelWithdrawal[]
+
+  @@index([driverId, status, date])
+}
+
+// type: "SERVICE" (плановое ТО) | "REPAIR" (внеплановый ремонт)
+model MaintenanceRecord {
+  id          Int               @id @default(autoincrement())
+  truck       Truck             @relation(fields: [truckId], references: [id])
+  truckId     Int
+  type        String
+  date        DateTime
+  odometer    Float
+  description String?
+  totalCost   Float
+  createdBy   Int
+  createdAt   DateTime          @default(now())
+  parts       MaintenancePart[]
+
+  @@index([truckId, date])
+  @@index([type, date])
+}
+
+model MaintenancePart {
+  id       Int               @id @default(autoincrement())
+  record   MaintenanceRecord @relation(fields: [recordId], references: [id])
+  recordId Int
+  name     String
+  cost     Float
+}

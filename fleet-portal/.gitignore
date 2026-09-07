@@ -1,8 +1,14 @@
 # секреты — не коммитить
 .env
 
-# склон frappe_docker используется только для Containerfile при сборке образа
-frappe_docker/
+# fleet-app: сборочные артефакты и локальная БД (см. app/server/.gitignore, app/web/.gitignore)
+app/server/node_modules/
+app/server/dist/
+app/server/public/
+app/server/*.db
+app/server/*.db-journal
+app/web/node_modules/
+app/web/dist/
 
 # служебное
 *.log

@@ -88,9 +88,9 @@
 
     <div class="grid">
       <a class="card erp" id="erp-link" href="#">
-        <span class="tag">ERPNext + vsd_fleet_ms</span>
-        <h2>Логистика и грузы</h2>
-        <p>Рейсы, маршруты, водители, тягачи и прицепы, заявки на топливо, техосмотры, ТТН и акты выполненных работ, бухгалтерия.</p>
+        <span class="tag">ИП Царюк А.Б.</span>
+        <h2>Топливо и рейсы</h2>
+        <p>Учёт топлива (приход, заправки, остатки, отчёты), маршрутные листы и задания водителям, ТТН и акты. Устанавливается как приложение на телефон.</p>
       </a>
 
       <a class="card lube" id="lube-link" href="#">
@@ -107,7 +107,7 @@
 
   <script>
     // Локально (MacBook): сервисы на отдельных портах.
-    // На VPS за Traefik (см. docker-compose.vps.yml): поддомены erp./garage.
+    // На VPS за Traefik (см. docker-compose.vps.yml): поддомены app./garage.
     var host = window.location.hostname;
     var proto = window.location.protocol;
     var port = window.location.port;
@@ -116,7 +116,7 @@
       erpHref = proto + "//" + host + ":8000";
       lubeHref = proto + "//" + host + ":8181";
     } else {
-      erpHref = proto + "//erp." + host;
+      erpHref = proto + "//app." + host;
       lubeHref = proto + "//garage." + host;
     }
     document.getElementById("erp-link").href = erpHref;
