@@ -9,6 +9,7 @@ import { FuelPage } from "./pages/dispatcher/FuelPage";
 import { MaintenancePage } from "./pages/dispatcher/MaintenancePage";
 import { TripsPage } from "./pages/dispatcher/TripsPage";
 import { MyTripsPage } from "./pages/driver/MyTripsPage";
+import { HelpPage } from "./pages/HelpPage";
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
@@ -36,6 +37,7 @@ export function App() {
                 { to: "/dispatcher/trips", label: "Рейсы" },
                 { to: "/dispatcher/documents", label: "Документы" },
                 { to: "/dispatcher/directories", label: "Справочники" },
+                { to: "/dispatcher/help", label: "Справка" },
               ]}
             />
           </ProtectedRoute>
@@ -46,17 +48,25 @@ export function App() {
         <Route path="trips" element={<TripsPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="directories" element={<DirectoriesPage />} />
+        <Route path="help" element={<HelpPage />} />
       </Route>
 
       <Route
         path="/driver"
         element={
           <ProtectedRoute roles={["DRIVER"]}>
-            <Layout title="Водитель" links={[{ to: "/driver/trips", label: "Мои рейсы" }]} />
+            <Layout
+              title="Водитель"
+              links={[
+                { to: "/driver/trips", label: "Мои рейсы" },
+                { to: "/driver/help", label: "Справка" },
+              ]}
+            />
           </ProtectedRoute>
         }
       >
         <Route path="trips" element={<MyTripsPage />} />
+        <Route path="help" element={<HelpPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

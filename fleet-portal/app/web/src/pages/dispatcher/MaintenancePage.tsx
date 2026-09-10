@@ -9,7 +9,7 @@ import type {
   Truck,
   UpcomingService,
 } from "../../api/types";
-import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
+import { Badge, Button, Card, ErrorText, Field, Input, Select, Table, Textarea } from "../../components/ui";
 import { toLocalDateString, todayLocalDateString } from "../../lib/date";
 
 const TABS = ["Дашборд", "Журнал", "Отчёты"] as const;
@@ -454,11 +454,12 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
               <Input type="number" min="0" value={odometer} onChange={(e) => setOdometer(e.target.value)} required />
             </Field>
           </div>
-          <div className="w-64">
-            <Field label={type === "REPAIR" ? "Что сломалось" : "Комментарий"}>
-              <Input value={description} onChange={(e) => setDescription(e.target.value)} />
-            </Field>
-          </div>
+        </div>
+
+        <div className="mb-3">
+          <Field label={type === "REPAIR" ? "Что сломалось" : "Комментарий"}>
+            <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+          </Field>
         </div>
 
         <p className="text-xs font-medium text-slate-500 mb-2">Запчасти</p>
@@ -567,7 +568,7 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
                 <Badge tone={r.type === "SERVICE" ? "green" : "amber"}>{r.type === "SERVICE" ? "ТО" : "Ремонт"}</Badge>
               </td>
               <td className="py-2 pr-4">{fmt(r.odometer)} км</td>
-              <td className="py-2 pr-4">{r.description ?? "—"}</td>
+              <td className="py-2 pr-4 max-w-xs whitespace-pre-wrap break-words">{r.description ?? "—"}</td>
               <td className="py-2 pr-4">{r.parts.map((p) => p.name).join(", ") || "—"}</td>
               <td className="py-2 pr-4">{fmt(r.totalCost)} ₽</td>
               <td className="py-2 pr-4 text-right whitespace-nowrap">
