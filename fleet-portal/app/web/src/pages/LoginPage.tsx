@@ -8,6 +8,7 @@ export function LoginPage() {
   const { user, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,7 +19,7 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(email, password, remember);
     } catch (err) {
       setError(describeError(err));
     } finally {
@@ -36,8 +37,18 @@ export function LoginPage() {
           <Input type="text" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus autoComplete="username" />
         </Field>
         <Field label="Пароль">
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
         </Field>
+
+        <label className="flex items-center gap-2 text-sm text-slate-600 mt-1 mb-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+          />
+          Запомнить меня
+        </label>
 
         <Button type="submit" disabled={submitting} className="w-full mt-2">
           {submitting ? "Входим…" : "Войти"}

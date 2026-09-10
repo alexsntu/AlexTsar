@@ -17,16 +17,6 @@ services:
     ports:
       - "${FLEET_APP_HTTP_PORT:-8000}:3000"
 
-  # ---------- LubeLogger: ТО, ремонты, топливо, пробег ----------
-  lubelogger:
-    image: ghcr.io/hargata/lubelogger:latest
-    restart: unless-stopped
-    volumes:
-      - lubelogger-data:/App/data
-      - lubelogger-keys:/root/.aspnet/DataProtection-Keys
-    ports:
-      - "${LUBELOGGER_HTTP_PORT:-8181}:8080"
-
   # ---------- Портал: единая стартовая страница ----------
   portal:
     image: nginx:alpine
@@ -38,5 +28,3 @@ services:
 
 volumes:
   fleet-app-data:
-  lubelogger-data:
-  lubelogger-keys:

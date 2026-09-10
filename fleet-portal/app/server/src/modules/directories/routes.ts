@@ -12,6 +12,8 @@ const truckSchema = z.object({
   serviceIntervalDays: z.number().int().positive().optional(),
   lastServiceDate: z.coerce.date().optional(),
   lastServiceOdometer: z.number().nonnegative().optional(),
+  insuranceExpiryDate: z.coerce.date().optional(),
+  inspectionExpiryDate: z.coerce.date().optional(),
 });
 
 const driverSchema = z.object({

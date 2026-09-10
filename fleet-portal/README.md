@@ -10,7 +10,6 @@
 |---|---|---|
 | **Портал** | Стартовая страница со ссылками | http://localhost:8888 |
 | **Fleet App** | Топливо, ТО и ремонт, рейсы и задания водителям, PWA (можно поставить на телефон) | http://localhost:8000 |
-| **LubeLogger** | Поднят про запас, сейчас не используется — ТО/ремонт ведём в Fleet App | http://localhost:8181 |
 
 Fleet App — это своё лёгкое приложение (Node.js/Fastify + SQLite на бэкенде,
 React/PWA на фронтенде), а не ERPNext: один компактный контейнер вместо
@@ -38,8 +37,6 @@ compose up -d --build` делает это автоматически при и�
 
 - **Fleet App**: логин — значение `FLEET_ADMIN_EMAIL` из `.env` (по умолчанию
   `admin@fleet.local`), пароль — `FLEET_ADMIN_PASSWORD`.
-- **LubeLogger**: при первом заходе на http://localhost:8181 попросит создать
-  учётную запись администратора — это нормально, приложение свежее.
 - Пароли и секреты лежат в `.env` (файл не коммитится в git, см.
   `.gitignore`).
 
@@ -76,13 +73,6 @@ compose up -d --build` делает это автоматически при и�
 > ТТН и Акты выполненных работ — печатные формы под конкретные реквизиты
 > компании ещё предстоит сверстать, когда будет точный формат.
 
-## LubeLogger
-
-Поднят в стеке про запас, но сейчас не используется — учёт ТО и ремонтов
-ведётся в разделе «ТО и ремонт» самого Fleet App. Если понадобится — доступен
-на http://localhost:8181 (при первом входе создаст отдельного
-администратора, база у него своя, не связана с Fleet App).
-
 ## Установка Fleet App на телефон (PWA)
 
 Откройте http://<адрес>:8000 в браузере телефона (Chrome/Safari) → меню
@@ -91,17 +81,16 @@ compose up -d --build` делает это автоматически при и�
 
 ## Перенос на VPS
 
-1. **Арендуйте VPS**: минимум 1 vCPU / 2 ГБ RAM достаточно (Fleet App лёгкий;
-   если парк вырастет — 2 vCPU / 4 ГБ с запасом) с чистым Ubuntu 22.04/24.04,
-   установите Docker Engine + Docker Compose plugin
+1. **Арендуйте VPS**: 2 vCPU / 4 ГБ RAM / 40–50 ГБ SSD с запасом, чистый
+   Ubuntu 22.04/24.04, установите Docker Engine + Docker Compose plugin
    (`curl -fsSL https://get.docker.com | sh`).
 2. **Скопируйте проект** на VPS (`git clone` вашего репозитория).
-3. **DNS**: заведите поддомены на IP VPS — `example.ru`, `app.example.ru`,
-   `garage.example.ru`.
+3. **DNS**: заведите A-записи на IP VPS — `avto-alex.online` (лендинг) и
+   `app.avto-alex.online` (Fleet App).
 4. **В `.env` добавьте**:
    ```
-   DOMAIN=example.ru
-   ACME_EMAIL=you@example.ru
+   DOMAIN=avto-alex.online
+   ACME_EMAIL=ваш@email
    ```
 5. **Смените секреты** в `.env` (`FLEET_JWT_SECRET`, `FLEET_ADMIN_PASSWORD`)
    на новые, продовые — сгенерировать можно так:
@@ -116,13 +105,11 @@ compose up -d --build` делает это автоматически при и�
    Traefik сам получит сертификаты Let's Encrypt для всех доменов.
 7. **Firewall**: откройте только 80/443 (и 22 для SSH) —
    `ufw allow 80,443,22/tcp && ufw enable`.
-8. **Бэкапы** (важно настроить сразу):
-   - Fleet App: том `fleet-app-data` содержит один файл SQLite —
-     `docker run --rm -v fleet_fleet-app-data:/data -v $PWD:/backup alpine tar czf /backup/fleet-app-$(date +%F).tar.gz /data`,
-     повесьте на cron раз в сутки и копируйте наружу (S3-совместимое
-     хранилище или другой сервер).
-   - LubeLogger: бэкапить том `fleet_lubelogger-data` (SQLite-база и
-     вложения) тем же способом.
+8. **Бэкапы** (важно настроить сразу): том `fleet-app-data` содержит один
+   файл SQLite со всеми данными —
+   `docker run --rm -v fleet_fleet-app-data:/data -v $PWD:/backup alpine tar czf /backup/fleet-app-$(date +%F).tar.gz /data`,
+   повесьте на cron раз в сутки и копируйте наружу (S3-совместимое
+   хранилище или другой сервер).
 
 ## Структура проекта
 

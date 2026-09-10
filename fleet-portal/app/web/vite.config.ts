@@ -10,6 +10,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png"],
       manifest: {
+        lang: "ru",
         name: "ИП Царюк А.Б. — Портал автопарка",
         short_name: "ИП Царюк А.Б.",
         description: "Топливо, рейсы и задания водителям",

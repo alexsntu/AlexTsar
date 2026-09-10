@@ -9,12 +9,11 @@
 #
 # И настройте DNS A-записи (на IP вашего VPS):
 #   example.ru          -> портал (лендинг со ссылками)
-#   app.example.ru      -> Fleet App (топливо, рейсы)
-#   garage.example.ru   -> LubeLogger
+#   app.example.ru      -> Fleet App (топливо, рейсы, ТО)
 
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.7
     restart: unless-stopped
     command:
       - --providers.docker=true
@@ -34,30 +33,29 @@ services:
       - traefik-letsencrypt:/letsencrypt
 
   fleet-app:
-    ports: []
+    ports: !reset []
     labels:
       - traefik.enable=true
       - traefik.http.routers.fleet-app.rule=Host(`app.${DOMAIN}`)
       - traefik.http.routers.fleet-app.entrypoints=websecure
       - traefik.http.routers.fleet-app.tls.certresolver=le
+      - traefik.http.routers.fleet-app.middlewares=security-headers
       - traefik.http.services.fleet-app.loadbalancer.server.port=3000
-
-  lubelogger:
-    ports: []
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.garage.rule=Host(`garage.${DOMAIN}`)
-      - traefik.http.routers.garage.entrypoints=websecure
-      - traefik.http.routers.garage.tls.certresolver=le
-      - traefik.http.services.garage.loadbalancer.server.port=8080
+      - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
+      - traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.security-headers.headers.stsPreload=true
+      - traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.security-headers.headers.frameDeny=true
+      - traefik.http.middlewares.security-headers.headers.browserXssFilter=true
 
   portal:
-    ports: []
+    ports: !reset []
     labels:
       - traefik.enable=true
       - traefik.http.routers.portal.rule=Host(`${DOMAIN}`)
       - traefik.http.routers.portal.entrypoints=websecure
       - traefik.http.routers.portal.tls.certresolver=le
+      - traefik.http.routers.portal.middlewares=security-headers@docker
       - traefik.http.services.portal.loadbalancer.server.port=80
 
 volumes:

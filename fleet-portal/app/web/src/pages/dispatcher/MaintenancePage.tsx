@@ -11,8 +11,21 @@ import type {
 } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
 
-const TABS = ["Напоминания", "Журнал", "Отчёты"] as const;
+const TABS = ["Дашборд", "Журнал", "Отчёты"] as const;
 type Tab = (typeof TABS)[number];
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** За сколько дней до истечения подсвечивать красным и показывать предупреждение. */
+const EXPIRY_WARNING_DAYS = 30;
+
+/** Сколько дней осталось до даты (может быть отрицательным, если уже просрочено). */
+function daysUntil(dateStr: string | null): number | null {
+  if (!dateStr) return null;
+  const due = new Date(dateStr.slice(0, 10) + "T00:00:00");
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.round((due.getTime() - now.getTime()) / DAY_MS);
+}
 
 interface JournalFilter {
   truckId?: number;
@@ -30,6 +43,8 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
   const [intervalDays, setIntervalDays] = useState(truck.serviceIntervalDays?.toString() ?? "");
   const [lastDate, setLastDate] = useState(truck.lastServiceDate?.slice(0, 10) ?? "");
   const [lastOdometer, setLastOdometer] = useState(truck.lastServiceOdometer?.toString() ?? "");
+  const [insuranceExpiryDate, setInsuranceExpiryDate] = useState(truck.insuranceExpiryDate?.slice(0, 10) ?? "");
+  const [inspectionExpiryDate, setInspectionExpiryDate] = useState(truck.inspectionExpiryDate?.slice(0, 10) ?? "");
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
@@ -41,6 +56,8 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
         serviceIntervalDays: intervalDays ? Number(intervalDays) : undefined,
         lastServiceDate: lastDate || undefined,
         lastServiceOdometer: lastOdometer ? Number(lastOdometer) : undefined,
+        insuranceExpiryDate: insuranceExpiryDate || undefined,
+        inspectionExpiryDate: inspectionExpiryDate || undefined,
       });
       onDone();
     } catch (err) {
@@ -70,9 +87,36 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
           <Input type="number" min="0" value={lastOdometer} onChange={(e) => setLastOdometer(e.target.value)} />
         </Field>
       </div>
+      <div className="w-36">
+        <Field label="Страховка до">
+          <Input type="date" value={insuranceExpiryDate} onChange={(e) => setInsuranceExpiryDate(e.target.value)} />
+        </Field>
+      </div>
+      <div className="w-36">
+        <Field label="Техосмотр до">
+          <Input type="date" value={inspectionExpiryDate} onChange={(e) => setInspectionExpiryDate(e.target.value)} />
+        </Field>
+      </div>
       <Button type="submit">Сохранить</Button>
       <ErrorText>{error}</ErrorText>
     </form>
+  );
+}
+
+/** Ячейка даты страховки/техосмотра: красным и жирным предупреждением за месяц до истечения. */
+function ExpiryCell({ dateStr, warningLabel }: { dateStr: string | null; warningLabel: string }) {
+  if (!dateStr) return <span className="text-slate-400">не указано</span>;
+  const days = daysUntil(dateStr);
+  const urgent = days !== null && days <= EXPIRY_WARNING_DAYS;
+  return (
+    <div>
+      <span className={urgent ? "text-red-600 font-bold" : ""}>{dateStr.slice(0, 10)}</span>
+      {urgent && (
+        <div className="text-red-600 font-bold text-xs mt-0.5">
+          {days !== null && days <= 0 ? `Просрочено! ${warningLabel}` : warningLabel}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -84,8 +128,10 @@ function UpcomingSection() {
   const upcomingByTruck = new Map((upcoming ?? []).map((u) => [u.truckId, u]));
 
   return (
-    <Card title="Ближайшее ТО по машинам">
-      <Table head={["Машина", "Интервал", "Последнее ТО", "Текущий пробег", "Осталось", ""]}>
+    <Card title="Дашборд по машинам: ТО, страховка, техосмотр">
+      <Table
+        head={["Машина", "Интервал", "Последнее ТО", "Текущий пробег", "Осталось", "Страховка до", "Техосмотр до", ""]}
+      >
         {(trucks ?? []).map((truck) => {
           const info = upcomingByTruck.get(truck.id);
           const hasSchedule = truck.serviceIntervalKm || truck.serviceIntervalDays;
@@ -115,6 +161,12 @@ function UpcomingSection() {
                     {info?.remainingDays != null && `(${info.remainingDays} дн.)`}
                   </span>
                 )}
+              </td>
+              <td className="py-2 pr-4 align-top">
+                <ExpiryCell dateStr={truck.insuranceExpiryDate} warningLabel="Продлите страховку" />
+              </td>
+              <td className="py-2 pr-4 align-top">
+                <ExpiryCell dateStr={truck.inspectionExpiryDate} warningLabel="Пройдите техосмотр" />
               </td>
               <td className="py-2 pr-4 align-top text-right">
                 <button
@@ -481,7 +533,7 @@ function MaintenanceReportsSection({ onViewRecords }: { onViewRecords: (filter: 
 }
 
 export function MaintenancePage() {
-  const [tab, setTab] = useState<Tab>("Напоминания");
+  const [tab, setTab] = useState<Tab>("Дашборд");
   const [journalFilter, setJournalFilter] = useState<JournalFilter | null>(null);
 
   function viewRecords(filter: JournalFilter) {
@@ -504,7 +556,7 @@ export function MaintenancePage() {
           </button>
         ))}
       </div>
-      {tab === "Напоминания" && <UpcomingSection />}
+      {tab === "Дашборд" && <UpcomingSection />}
       {tab === "Журнал" && <JournalSection initialFilter={journalFilter} />}
       {tab === "Отчёты" && <MaintenanceReportsSection onViewRecords={viewRecords} />}
     </div>

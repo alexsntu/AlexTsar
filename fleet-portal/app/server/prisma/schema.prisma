@@ -42,6 +42,8 @@ model Truck {
   serviceIntervalDays  Int?
   lastServiceDate      DateTime?
   lastServiceOdometer  Float?
+  insuranceExpiryDate  DateTime?
+  inspectionExpiryDate DateTime?
   isActive             Boolean             @default(true)
   trips                Trip[]
   withdrawals          FuelWithdrawal[]

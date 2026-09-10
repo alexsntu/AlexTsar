@@ -7,6 +7,7 @@ import type { Role } from "../../types.js";
 const loginSchema = z.object({
   email: z.string().min(1),
   password: z.string().min(1),
+  remember: z.boolean().optional().default(true),
 });
 
 export default async function authRoutes(fastify: FastifyInstance) {
@@ -21,7 +22,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       if (!parsed.success) {
         return reply.code(400).send({ error: "invalid_body" });
       }
-      const { email, password } = parsed.data;
+      const { email, password, remember } = parsed.data;
 
       const user = await fastify.prisma.user.findUnique({ where: { email } });
       if (!user || !user.isActive) {
@@ -33,8 +34,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
         return reply.code(401).send({ error: "invalid_credentials" });
       }
 
-      const token = signAuthToken({ id: user.id, role: user.role as Role, driverId: user.driverId });
-      setAuthCookie(reply, token);
+      const token = signAuthToken({ id: user.id, role: user.role as Role, driverId: user.driverId }, remember);
+      setAuthCookie(reply, token, remember);
 
       return { id: user.id, email: user.email, role: user.role, driverId: user.driverId };
     },

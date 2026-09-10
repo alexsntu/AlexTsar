@@ -5,7 +5,8 @@ import { env } from "../env.js";
 import type { Role } from "../types.js";
 
 const COOKIE_NAME = "fleet_token";
-const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 дней
+const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 дней (по умолчанию, без "запомнить меня")
+const REMEMBER_TTL_SECONDS = 60 * 60 * 24 * 365; // 1 год (с "запомнить меня")
 
 export interface AuthUser {
   id: number;
@@ -23,17 +24,17 @@ declare module "fastify" {
   }
 }
 
-export function signAuthToken(user: AuthUser): string {
-  return jwt.sign(user, env.jwtSecret, { expiresIn: TOKEN_TTL_SECONDS });
+export function signAuthToken(user: AuthUser, remember: boolean): string {
+  return jwt.sign(user, env.jwtSecret, { expiresIn: remember ? REMEMBER_TTL_SECONDS : TOKEN_TTL_SECONDS });
 }
 
-export function setAuthCookie(reply: FastifyReply, token: string) {
+export function setAuthCookie(reply: FastifyReply, token: string, remember: boolean) {
   reply.setCookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: env.nodeEnv === "production",
     path: "/",
-    maxAge: TOKEN_TTL_SECONDS,
+    maxAge: remember ? REMEMBER_TTL_SECONDS : TOKEN_TTL_SECONDS,
   });
 }
 
