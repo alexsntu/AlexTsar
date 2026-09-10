@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { round2 } from "../../lib/money.js";
+import { mskDayStart, mskDayEnd } from "../../lib/date.js";
 
 const querySchema = z.object({
   from: z.coerce.date().optional(),
@@ -16,7 +17,7 @@ export default async function maintenanceReportsRoutes(fastify: FastifyInstance)
     if (!query.success) return reply.code(400).send({ error: "invalid_query" });
 
     const records = await fastify.prisma.maintenanceRecord.findMany({
-      where: { date: { gte: query.data.from, lte: query.data.to } },
+      where: { date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) } },
       include: { truck: true },
     });
 

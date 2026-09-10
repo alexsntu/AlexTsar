@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export function Layout({ links, title }: { links: { to: string; label: string }[]; title: string }) {
-  const { user, logout } = useAuth();
+  const { user, logout, logoutEverywhere } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -14,6 +14,16 @@ export function Layout({ links, title }: { links: { to: string; label: string }[
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-slate-300">{user?.email}</span>
+            <button
+              onClick={() => {
+                if (window.confirm("Выйти со всех устройств? Понадобится заново войти везде, включая этот телефон/браузер."))
+                  void logoutEverywhere();
+              }}
+              className="text-slate-400 hover:text-white underline underline-offset-2 text-xs"
+              title="Отозвать доступ у всех устройств, где вы входили — например, если потеряли телефон"
+            >
+              Выйти везде
+            </button>
             <button onClick={() => void logout()} className="text-slate-300 hover:text-white underline underline-offset-2">
               Выйти
             </button>

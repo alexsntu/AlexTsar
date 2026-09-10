@@ -5,6 +5,7 @@ import { useApi } from "../../hooks/useApi";
 import type { Driver, Trip, TripStatus, Truck } from "../../api/types";
 import { TRIP_STATUS_LABELS } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
+import { todayLocalDateString } from "../../lib/date";
 
 const STATUS_TONE: Record<TripStatus, "slate" | "green" | "amber" | "red"> = {
   ASSIGNED: "slate",
@@ -18,7 +19,7 @@ export function TripsPage() {
   const { data: trucks } = useApi<Truck[]>("/api/trucks");
   const { data: trips, reload } = useApi<Trip[]>("/api/trips");
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => todayLocalDateString());
   const [driverId, setDriverId] = useState("");
   const [truckId, setTruckId] = useState("");
   const [routeFrom, setRouteFrom] = useState("");

@@ -88,6 +88,7 @@ export interface ConsumptionRow {
   companyCost: number;
   personalLiters: number;
   personalCost: number;
+  count: number;
 }
 
 export interface ConsumptionReport {
@@ -98,6 +99,19 @@ export interface ConsumptionReport {
     personalLiters: number;
     personalCost: number;
   };
+}
+
+export interface InflowRow {
+  fuelTypeId: number;
+  fuelTypeName: string;
+  liters: number;
+  cost: number;
+  count: number;
+}
+
+export interface InflowReport {
+  rows: InflowRow[];
+  totals: { liters: number; cost: number };
 }
 
 export interface Per100KmReport {

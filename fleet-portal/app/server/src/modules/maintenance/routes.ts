@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { computeUpcomingService, createMaintenanceRecord } from "./service.js";
+import { computeUpcomingService, createMaintenanceRecord, updateMaintenanceRecord, deleteMaintenanceRecord } from "./service.js";
+import { mskDayStart, mskDayEnd } from "../../lib/date.js";
 
 const partSchema = z.object({
   name: z.string().min(1),
@@ -42,6 +43,29 @@ export default async function maintenanceRoutes(fastify: FastifyInstance) {
     });
   });
 
+  fastify.patch<{ Params: { id: string } }>("/api/maintenance/records/:id", writeGuard, async (request, reply) => {
+    const parsed = recordSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body", details: parsed.error.flatten() });
+    const data = parsed.data;
+
+    const record = await updateMaintenanceRecord(fastify.prisma, Number(request.params.id), {
+      truckId: data.truckId,
+      type: data.type,
+      date: data.date,
+      odometer: data.odometer,
+      description: data.description ?? null,
+      parts: data.parts,
+    });
+    if (!record) return reply.code(404).send({ error: "not_found" });
+    return record;
+  });
+
+  fastify.delete<{ Params: { id: string } }>("/api/maintenance/records/:id", writeGuard, async (request, reply) => {
+    const record = await deleteMaintenanceRecord(fastify.prisma, Number(request.params.id));
+    if (!record) return reply.code(404).send({ error: "not_found" });
+    return { ok: true };
+  });
+
   fastify.get("/api/maintenance/records", writeGuard, async (request, reply) => {
     const query = listQuerySchema.safeParse(request.query);
     if (!query.success) return reply.code(400).send({ error: "invalid_query" });
@@ -50,7 +74,7 @@ export default async function maintenanceRoutes(fastify: FastifyInstance) {
       where: {
         truckId: query.data.truckId,
         type: query.data.type,
-        date: { gte: query.data.from, lte: query.data.to },
+        date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) },
       },
       include: { truck: true, parts: true },
       orderBy: [{ date: "desc" }, { id: "desc" }],

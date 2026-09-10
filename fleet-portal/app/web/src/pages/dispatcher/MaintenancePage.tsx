@@ -10,6 +10,7 @@ import type {
   UpcomingService,
 } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
+import { toLocalDateString, todayLocalDateString } from "../../lib/date";
 
 const TABS = ["Дашборд", "Журнал", "Отчёты"] as const;
 type Tab = (typeof TABS)[number];
@@ -51,13 +52,15 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
     event.preventDefault();
     setError(null);
     try {
+      // Пустое поле шлём как null ("очистить"), а не undefined ("не менялось") —
+      // иначе сброс даты/интервала в форме не сохранялся на сервере.
       await api.patch(`/api/trucks/${truck.id}`, {
-        serviceIntervalKm: intervalKm ? Number(intervalKm) : undefined,
-        serviceIntervalDays: intervalDays ? Number(intervalDays) : undefined,
-        lastServiceDate: lastDate || undefined,
-        lastServiceOdometer: lastOdometer ? Number(lastOdometer) : undefined,
-        insuranceExpiryDate: insuranceExpiryDate || undefined,
-        inspectionExpiryDate: inspectionExpiryDate || undefined,
+        serviceIntervalKm: intervalKm ? Number(intervalKm) : null,
+        serviceIntervalDays: intervalDays ? Number(intervalDays) : null,
+        lastServiceDate: lastDate || null,
+        lastServiceOdometer: lastOdometer ? Number(lastOdometer) : null,
+        insuranceExpiryDate: insuranceExpiryDate || null,
+        inspectionExpiryDate: inspectionExpiryDate || null,
       });
       onDone();
     } catch (err) {
@@ -120,6 +123,18 @@ function ExpiryCell({ dateStr, warningLabel }: { dateStr: string | null; warning
   );
 }
 
+/** Осталось до ТО — общий кусок для таблицы (десктоп) и карточки (мобильный). */
+function RemainingCell({ hasSchedule, info }: { hasSchedule: boolean | number | null | undefined; info: UpcomingService | undefined }) {
+  if (!hasSchedule) return <span className="text-slate-400">интервал не задан</span>;
+  if (info?.overdue) return <Badge tone="red">просрочено</Badge>;
+  return (
+    <span>
+      {info?.remainingKm != null && `${fmt(info.remainingKm)} км `}
+      {info?.remainingDays != null && `(${info.remainingDays} дн.)`}
+    </span>
+  );
+}
+
 function UpcomingSection() {
   const { data: trucks, reload: reloadTrucks } = useApi<Truck[]>("/api/trucks");
   const { data: upcoming, reload: reloadUpcoming } = useApi<UpcomingService[]>("/api/maintenance/upcoming");
@@ -127,76 +142,131 @@ function UpcomingSection() {
 
   const upcomingByTruck = new Map((upcoming ?? []).map((u) => [u.truckId, u]));
 
+  function toggleEdit(truckId: number) {
+    setEditingTruckId(editingTruckId === truckId ? null : truckId);
+  }
+
+  function onFormDone() {
+    setEditingTruckId(null);
+    void reloadTrucks();
+    void reloadUpcoming();
+  }
+
   return (
     <Card title="Дашборд по машинам: ТО, страховка, техосмотр">
-      <Table
-        head={["Машина", "Интервал", "Последнее ТО", "Текущий пробег", "Осталось", "Страховка до", "Техосмотр до", ""]}
-      >
+      {/* Десктоп/планшет — таблица */}
+      <div className="hidden sm:block">
+        <Table
+          head={["Машина", "Интервал", "Последнее ТО", "Текущий пробег", "Осталось", "Страховка до", "Техосмотр до", ""]}
+        >
+          {(trucks ?? []).map((truck) => {
+            const info = upcomingByTruck.get(truck.id);
+            const hasSchedule = truck.serviceIntervalKm || truck.serviceIntervalDays;
+            return (
+              <tr key={truck.id}>
+                <td className="py-2 pr-4 align-top">
+                  {truck.name} ({truck.plateNumber})
+                </td>
+                <td className="py-2 pr-4 align-top">
+                  {truck.serviceIntervalKm ? `${fmt(truck.serviceIntervalKm)} км` : "—"}
+                  {truck.serviceIntervalDays ? ` / ${truck.serviceIntervalDays} дн.` : ""}
+                </td>
+                <td className="py-2 pr-4 align-top">
+                  {truck.lastServiceDate
+                    ? `${truck.lastServiceDate.slice(0, 10)} (${fmt(truck.lastServiceOdometer ?? 0)} км)`
+                    : "—"}
+                </td>
+                <td className="py-2 pr-4 align-top">{info?.currentOdometer != null ? `${fmt(info.currentOdometer)} км` : "—"}</td>
+                <td className="py-2 pr-4 align-top">
+                  <RemainingCell hasSchedule={hasSchedule} info={info} />
+                </td>
+                <td className="py-2 pr-4 align-top">
+                  <ExpiryCell dateStr={truck.insuranceExpiryDate} warningLabel="Продлите страховку" />
+                </td>
+                <td className="py-2 pr-4 align-top">
+                  <ExpiryCell dateStr={truck.inspectionExpiryDate} warningLabel="Пройдите техосмотр" />
+                </td>
+                <td className="py-2 pr-4 align-top text-right">
+                  <button onClick={() => toggleEdit(truck.id)} className="text-sky-600 text-xs hover:underline">
+                    Настроить
+                  </button>
+                  {editingTruckId === truck.id && <ScheduleForm truck={truck} onDone={onFormDone} />}
+                </td>
+              </tr>
+            );
+          })}
+        </Table>
+      </div>
+
+      {/* Телефон — по одной карточке на машину вместо тесной таблицы */}
+      <div className="sm:hidden divide-y divide-slate-100">
         {(trucks ?? []).map((truck) => {
           const info = upcomingByTruck.get(truck.id);
           const hasSchedule = truck.serviceIntervalKm || truck.serviceIntervalDays;
           return (
-            <tr key={truck.id}>
-              <td className="py-2 pr-4 align-top">
-                {truck.name} ({truck.plateNumber})
-              </td>
-              <td className="py-2 pr-4 align-top">
-                {truck.serviceIntervalKm ? `${fmt(truck.serviceIntervalKm)} км` : "—"}
-                {truck.serviceIntervalDays ? ` / ${truck.serviceIntervalDays} дн.` : ""}
-              </td>
-              <td className="py-2 pr-4 align-top">
-                {truck.lastServiceDate
-                  ? `${truck.lastServiceDate.slice(0, 10)} (${fmt(truck.lastServiceOdometer ?? 0)} км)`
-                  : "—"}
-              </td>
-              <td className="py-2 pr-4 align-top">{info?.currentOdometer != null ? `${fmt(info.currentOdometer)} км` : "—"}</td>
-              <td className="py-2 pr-4 align-top">
-                {!hasSchedule ? (
-                  <span className="text-slate-400">интервал не задан</span>
-                ) : info?.overdue ? (
-                  <Badge tone="red">просрочено</Badge>
-                ) : (
-                  <span>
-                    {info?.remainingKm != null && `${fmt(info.remainingKm)} км `}
-                    {info?.remainingDays != null && `(${info.remainingDays} дн.)`}
-                  </span>
-                )}
-              </td>
-              <td className="py-2 pr-4 align-top">
-                <ExpiryCell dateStr={truck.insuranceExpiryDate} warningLabel="Продлите страховку" />
-              </td>
-              <td className="py-2 pr-4 align-top">
-                <ExpiryCell dateStr={truck.inspectionExpiryDate} warningLabel="Пройдите техосмотр" />
-              </td>
-              <td className="py-2 pr-4 align-top text-right">
+            <div key={truck.id} className="py-3 first:pt-0">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <p className="font-semibold text-slate-800">
+                  {truck.name} <span className="text-slate-400 font-normal">({truck.plateNumber})</span>
+                </p>
                 <button
-                  onClick={() => setEditingTruckId(editingTruckId === truck.id ? null : truck.id)}
-                  className="text-sky-600 text-xs hover:underline"
+                  onClick={() => toggleEdit(truck.id)}
+                  className="text-sky-600 text-xs hover:underline shrink-0 whitespace-nowrap pt-0.5"
                 >
                   Настроить
                 </button>
-                {editingTruckId === truck.id && (
-                  <ScheduleForm
-                    truck={truck}
-                    onDone={() => {
-                      setEditingTruckId(null);
-                      void reloadTrucks();
-                      void reloadUpcoming();
-                    }}
-                  />
-                )}
-              </td>
-            </tr>
+              </div>
+              <dl className="space-y-1.5 text-sm">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Интервал ТО</dt>
+                  <dd className="text-right">
+                    {truck.serviceIntervalKm ? `${fmt(truck.serviceIntervalKm)} км` : "—"}
+                    {truck.serviceIntervalDays ? ` / ${truck.serviceIntervalDays} дн.` : ""}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Последнее ТО</dt>
+                  <dd className="text-right">
+                    {truck.lastServiceDate
+                      ? `${truck.lastServiceDate.slice(0, 10)} (${fmt(truck.lastServiceOdometer ?? 0)} км)`
+                      : "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Текущий пробег</dt>
+                  <dd className="text-right">{info?.currentOdometer != null ? `${fmt(info.currentOdometer)} км` : "—"}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Осталось</dt>
+                  <dd className="text-right">
+                    <RemainingCell hasSchedule={hasSchedule} info={info} />
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Страховка до</dt>
+                  <dd className="text-right">
+                    <ExpiryCell dateStr={truck.insuranceExpiryDate} warningLabel="Продлите страховку" />
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500 shrink-0">Техосмотр до</dt>
+                  <dd className="text-right">
+                    <ExpiryCell dateStr={truck.inspectionExpiryDate} warningLabel="Пройдите техосмотр" />
+                  </dd>
+                </div>
+              </dl>
+              {editingTruckId === truck.id && <ScheduleForm truck={truck} onDone={onFormDone} />}
+            </div>
           );
         })}
-      </Table>
+      </div>
     </Card>
   );
 }
 
 function monthRange(date = new Date()): { from: string; to: string } {
-  const from = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().slice(0, 10);
-  const to = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().slice(0, 10);
+  const from = toLocalDateString(new Date(date.getFullYear(), date.getMonth(), 1));
+  const to = toLocalDateString(new Date(date.getFullYear(), date.getMonth() + 1, 0));
   return { from, to };
 }
 
@@ -255,11 +325,17 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
 
   const [truckId, setTruckId] = useState("");
   const [type, setType] = useState<MaintenanceType>("SERVICE");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => todayLocalDateString());
   const [odometer, setOdometer] = useState("");
   const [description, setDescription] = useState("");
   const [parts, setParts] = useState([{ name: "", cost: "" }]);
   const [error, setError] = useState<string | null>(null);
+  // null — форма создаёт новую запись; число — редактируем запись с этим id
+  // (та же форма сверху, просто предзаполненная и с другой кнопкой отправки).
+  const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
+  // Форма свёрнута по умолчанию — меньше "шума" на экране; открывается по
+  // клику на заголовок или программно при клике на запись журнала.
+  const [formOpen, setFormOpen] = useState(false);
 
   const totalCost = parts.reduce((sum, p) => sum + (Number(p.cost) || 0), 0);
 
@@ -275,22 +351,59 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
     setParts((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function resetForm() {
+    setEditingRecordId(null);
+    setTruckId("");
+    setType("SERVICE");
+    setDate(todayLocalDateString());
+    setOdometer("");
+    setDescription("");
+    setParts([{ name: "", cost: "" }]);
+    setFormOpen(false);
+  }
+
+  function startEdit(record: MaintenanceRecord) {
+    setEditingRecordId(record.id);
+    setTruckId(String(record.truckId));
+    setType(record.type);
+    setDate(record.date.slice(0, 10));
+    setOdometer(String(record.odometer));
+    setDescription(record.description ?? "");
+    setParts(record.parts.length > 0 ? record.parts.map((p) => ({ name: p.name, cost: String(p.cost) })) : [{ name: "", cost: "" }]);
+    setFormOpen(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleDelete(record: MaintenanceRecord) {
+    if (!window.confirm(`Удалить запись «${record.type === "SERVICE" ? "ТО" : "Ремонт"}» от ${record.date.slice(0, 10)}? Это необратимо.`)) return;
+    try {
+      await api.delete(`/api/maintenance/records/${record.id}`);
+      if (editingRecordId === record.id) resetForm();
+      await reload();
+    } catch (err) {
+      setError(describeError(err));
+    }
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     try {
       const validParts = parts.filter((p) => p.name.trim() && p.cost !== "").map((p) => ({ name: p.name, cost: Number(p.cost) }));
-      await api.post("/api/maintenance/records", {
+      const payload = {
         truckId: Number(truckId),
         type,
         date,
         odometer: Number(odometer),
         description: description || undefined,
         parts: validParts,
-      });
-      setOdometer("");
-      setDescription("");
-      setParts([{ name: "", cost: "" }]);
+      };
+      if (editingRecordId) {
+        await api.patch(`/api/maintenance/records/${editingRecordId}`, payload);
+      } else {
+        await api.post("/api/maintenance/records", payload);
+      }
+      resetForm();
       await reload();
     } catch (err) {
       setError(describeError(err));
@@ -300,7 +413,15 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
   return (
     <div>
       <CurrentMonthSummary />
-      <Card title="Новая запись: ТО или ремонт">
+      <Card
+        title={editingRecordId ? `Запись №${editingRecordId}: ТО или ремонт` : "Новая запись: ТО или ремонт"}
+        collapsible
+        open={formOpen}
+        onToggle={(next) => {
+          if (next) setFormOpen(true);
+          else resetForm();
+        }}
+      >
       <form onSubmit={handleSubmit} className="mb-4">
         <div className="flex gap-2 items-end flex-wrap mb-3">
           <div className="w-40">
@@ -368,7 +489,12 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
         </button>
 
         <div className="flex items-center gap-4">
-          <Button type="submit">Сохранить запись</Button>
+          <Button type="submit">{editingRecordId ? "Сохранить изменения" : "Сохранить запись"}</Button>
+          {editingRecordId && (
+            <button type="button" onClick={resetForm} className="text-sm text-slate-500 hover:underline">
+              Отмена
+            </button>
+          )}
           <span className="text-sm text-slate-600">
             Итого: <strong>{fmt(totalCost)} ₽</strong>
           </span>
@@ -377,7 +503,7 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
       </form>
       </Card>
 
-      <Card title="Журнал ТО и ремонтов">
+      <Card title="Журнал ТО и ремонтов" collapsible>
         <div className="flex gap-2 items-end flex-wrap mb-4">
           <div className="w-44">
             <Field label="Машина">
@@ -425,9 +551,14 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
           )}
         </div>
 
-        <Table head={["Дата", "Машина", "Тип", "Пробег", "Описание", "Запчасти", "Сумма"]}>
+        <Table head={["Дата", "Машина", "Тип", "Пробег", "Описание", "Запчасти", "Сумма", ""]}>
           {(records ?? []).map((r) => (
-            <tr key={r.id}>
+            <tr
+              key={r.id}
+              onClick={() => startEdit(r)}
+              className={`cursor-pointer hover:bg-slate-50 ${editingRecordId === r.id ? "bg-sky-50" : ""}`}
+              title="Открыть запись"
+            >
               <td className="py-2 pr-4">{r.date.slice(0, 10)}</td>
               <td className="py-2 pr-4">
                 {r.truck?.name} ({r.truck?.plateNumber})
@@ -439,6 +570,17 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
               <td className="py-2 pr-4">{r.description ?? "—"}</td>
               <td className="py-2 pr-4">{r.parts.map((p) => p.name).join(", ") || "—"}</td>
               <td className="py-2 pr-4">{fmt(r.totalCost)} ₽</td>
+              <td className="py-2 pr-4 text-right whitespace-nowrap">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleDelete(r);
+                  }}
+                  className="text-red-600 text-xs hover:underline"
+                >
+                  Удалить
+                </button>
+              </td>
             </tr>
           ))}
         </Table>

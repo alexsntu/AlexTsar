@@ -2,32 +2,53 @@ import type { FastifyInstance } from "fastify";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
-const truckSchema = z.object({
-  name: z.string().min(1),
-  plateNumber: z.string().min(1),
-  capacityTons: z.number().positive().optional(),
-  normConsumptionMin: z.number().positive().optional(),
-  normConsumptionMax: z.number().positive().optional(),
-  serviceIntervalKm: z.number().positive().optional(),
-  serviceIntervalDays: z.number().int().positive().optional(),
-  lastServiceDate: z.coerce.date().optional(),
-  lastServiceOdometer: z.number().nonnegative().optional(),
-  insuranceExpiryDate: z.coerce.date().optional(),
-  inspectionExpiryDate: z.coerce.date().optional(),
+// z.null() ДО z.coerce.date() в union: иначе coerce молча превращает null в
+// 1970-01-01 (new Date(null) валиден) вместо того, чтобы дать понять
+// "очистить поле". undefined (поле не пришло) — "не менялось", null (пришло
+// явно) — "очистить", как и должно различаться в PATCH.
+const clearableDate = z.union([z.null(), z.coerce.date()]).optional();
+
+// Отдельно от .refine() ниже — ZodEffects (результат refine) не поддерживает
+// .partial(), а PATCH-схема (truckSchema.partial()) нужна как объект.
+const truckObjectSchema = z.object({
+  name: z.string().min(1).max(200),
+  plateNumber: z.string().min(1).max(20),
+  capacityTons: z.number().positive().max(1000).optional(),
+  normConsumptionMin: z.number().positive().max(1000).optional(),
+  normConsumptionMax: z.number().positive().max(1000).optional(),
+  serviceIntervalKm: z.union([z.null(), z.number().positive().max(1_000_000)]).optional(),
+  serviceIntervalDays: z.union([z.null(), z.number().int().positive().max(3650)]).optional(),
+  lastServiceDate: clearableDate,
+  lastServiceOdometer: z.union([z.null(), z.number().nonnegative().max(10_000_000)]).optional(),
+  insuranceExpiryDate: clearableDate,
+  inspectionExpiryDate: clearableDate,
 });
 
+const NORM_RANGE_MESSAGE = { message: "Норма расхода: минимум не может быть больше максимума", path: ["normConsumptionMin"] };
+
+const truckSchema = truckObjectSchema.refine(
+  (data) => data.normConsumptionMin === undefined || data.normConsumptionMax === undefined || data.normConsumptionMin <= data.normConsumptionMax,
+  NORM_RANGE_MESSAGE,
+);
+// Без .refine() здесь: PATCH шлёт только изменённые поля, и сравнивать
+// нужно с ИТОГОВЫМ состоянием (текущая запись + патч), а не только с тем,
+// что пришло в этом запросе — иначе PATCH одного только normConsumptionMin
+// молча испортит уже сохранённый normConsumptionMax (см. ревью). Итоговую
+// проверку делает сам роут в directoriesRoutes, где известна текущая запись.
+const truckPatchSchema = truckObjectSchema.partial();
+
 const driverSchema = z.object({
-  fullName: z.string().min(1),
-  phone: z.string().optional(),
+  fullName: z.string().min(1).max(200),
+  phone: z.string().max(30).optional(),
 });
 
 const credentialsSchema = z.object({
-  email: z.string().min(1),
-  password: z.string().min(6),
+  email: z.string().min(1).max(200),
+  password: z.string().min(6).max(200),
 });
 
 const fuelTypeSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1).max(100),
 });
 
 export default async function directoriesRoutes(fastify: FastifyInstance) {
@@ -46,9 +67,23 @@ export default async function directoriesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.patch<{ Params: { id: string } }>("/api/trucks/:id", writeGuard, async (request, reply) => {
-    const parsed = truckSchema.partial().safeParse(request.body);
+    const parsed = truckPatchSchema.safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
-    return fastify.prisma.truck.update({ where: { id: Number(request.params.id) }, data: parsed.data });
+
+    const truckId = Number(request.params.id);
+    const current = await fastify.prisma.truck.findUnique({ where: { id: truckId } });
+    if (!current) return reply.code(404).send({ error: "not_found" });
+
+    // Сравниваем ИТОГОВОЕ состояние (текущая запись + патч), а не только
+    // поля из этого запроса — иначе PATCH одного normConsumptionMin молча
+    // портит уже сохранённый normConsumptionMax (см. ревью).
+    const nextMin = parsed.data.normConsumptionMin !== undefined ? parsed.data.normConsumptionMin : current.normConsumptionMin;
+    const nextMax = parsed.data.normConsumptionMax !== undefined ? parsed.data.normConsumptionMax : current.normConsumptionMax;
+    if (nextMin != null && nextMax != null && nextMin > nextMax) {
+      return reply.code(400).send({ error: "invalid_norm_range" });
+    }
+
+    return fastify.prisma.truck.update({ where: { id: truckId }, data: parsed.data });
   });
 
   fastify.delete<{ Params: { id: string } }>("/api/trucks/:id", writeGuard, async (request) => {
@@ -56,7 +91,9 @@ export default async function directoriesRoutes(fastify: FastifyInstance) {
   });
 
   // ---------- Водители ----------
-  fastify.get("/api/drivers", readGuard, async () => {
+  // Только ADMIN/DISPATCHER — тут телефоны и логины всех водителей, обычному
+  // водителю (после входа в свой кабинет) это видеть не нужно.
+  fastify.get("/api/drivers", writeGuard, async () => {
     const drivers = await fastify.prisma.driver.findMany({
       where: { isActive: true },
       include: { user: true },
@@ -78,7 +115,17 @@ export default async function directoriesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete<{ Params: { id: string } }>("/api/drivers/:id", writeGuard, async (request) => {
-    return fastify.prisma.driver.update({ where: { id: Number(request.params.id) }, data: { isActive: false } });
+    const driverId = Number(request.params.id);
+    // Архивируем водителя и в той же транзакции закрываем его логин (если он есть) —
+    // иначе он сохраняет доступ в свой кабинет по старому паролю после увольнения.
+    return fastify.prisma.$transaction(async (tx) => {
+      const driver = await tx.driver.update({ where: { id: driverId }, data: { isActive: false } });
+      await tx.user.updateMany({
+        where: { driverId },
+        data: { isActive: false, tokenVersion: { increment: 1 } },
+      });
+      return driver;
+    });
   });
 
   // Завести логин водителю (или сбросить пароль существующему) — без этого
@@ -93,9 +140,10 @@ export default async function directoriesRoutes(fastify: FastifyInstance) {
     try {
       const existing = await fastify.prisma.user.findUnique({ where: { driverId } });
       if (existing) {
+        // Смена пароля отзывает все ранее выданные сессии этого логина.
         await fastify.prisma.user.update({
           where: { id: existing.id },
-          data: { email: parsed.data.email, passwordHash, isActive: true },
+          data: { email: parsed.data.email, passwordHash, isActive: true, tokenVersion: { increment: 1 } },
         });
       } else {
         await fastify.prisma.user.create({

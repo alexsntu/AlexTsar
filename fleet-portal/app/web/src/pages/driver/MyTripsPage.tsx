@@ -5,6 +5,7 @@ import { useApi } from "../../hooks/useApi";
 import type { FuelType, Trip, TripStatus } from "../../api/types";
 import { TRIP_STATUS_LABELS } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select } from "../../components/ui";
+import { todayLocalDateString } from "../../lib/date";
 
 const STATUS_TONE: Record<TripStatus, "slate" | "green" | "amber" | "red"> = {
   ASSIGNED: "slate",
@@ -20,24 +21,32 @@ function FuelForm({ tripId, onDone }: { tripId: number; onDone: () => void }) {
   const [odometer, setOdometer] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (submitting) return;
     setError(null);
     setOk(false);
+    setSubmitting(true);
     try {
       await api.post(`/api/trips/${tripId}/fuel`, {
         fuelTypeId: Number(fuelTypeId),
-        date: new Date().toISOString().slice(0, 10),
+        date: todayLocalDateString(),
         liters: Number(liters),
         odometer: odometer ? Number(odometer) : undefined,
+        idempotencyKey,
       });
       setLiters("");
       setOdometer("");
       setOk(true);
+      setIdempotencyKey(crypto.randomUUID());
       onDone();
     } catch (err) {
       setError(describeError(err));
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -67,7 +76,9 @@ function FuelForm({ tripId, onDone }: { tripId: number; onDone: () => void }) {
             <Input type="number" min="0" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
           </Field>
         </div>
-        <Button type="submit">Списать</Button>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Списываем…" : "Списать"}
+        </Button>
       </div>
       <ErrorText>{error}</ErrorText>
       {ok && <p className="text-sm text-emerald-600 mt-2">Заправка записана</p>}

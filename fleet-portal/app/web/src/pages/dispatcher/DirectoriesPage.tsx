@@ -98,6 +98,7 @@ function TrucksSection() {
 function CredentialsForm({ driverId, onDone }: { driverId: number; onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
@@ -120,7 +121,23 @@ function CredentialsForm({ driverId, onDone }: { driverId: number; onDone: () =>
       </div>
       <div className="w-40">
         <Field label="Пароль">
-          <Input type="text" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+          <div className="flex items-center gap-1">
+            <Input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="text-xs text-slate-500 hover:text-slate-700 whitespace-nowrap"
+              tabIndex={-1}
+            >
+              {showPassword ? "скрыть" : "показать"}
+            </button>
+          </div>
         </Field>
       </div>
       <Button type="submit">Сохранить</Button>

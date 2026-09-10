@@ -16,6 +16,9 @@ model User {
   passwordHash String
   role         String
   isActive     Boolean  @default(true)
+  // Увеличивается при смене пароля/блокировке — все ранее выданные токены
+  // с меньшей версией сразу перестают приниматься сервером (отзыв сессий).
+  tokenVersion Int      @default(0)
   driverId     Int?     @unique
   driver       Driver?  @relation(fields: [driverId], references: [id])
   createdAt    DateTime @default(now())
@@ -69,6 +72,12 @@ model FuelLot {
   litersRemaining  Float
   pricePerLiter    Float
   totalAmount      Float
+  // Сколько из totalAmount ещё не списано FIFO-заправками. Последнее
+  // списание, которое полностью опустошает партию, забирает весь остаток
+  // (а не litersUsed*pricePerLiter) — так сумма всех списаний с партии
+  // всегда точно равна totalAmount, без накопленной ошибки округления
+  // (см. computeFifoConsumption в lib/fifo.ts).
+  valueRemaining   Float
   supplier         String?
   comment          String?
   createdBy        Int
@@ -89,6 +98,9 @@ model FuelWithdrawal {
   truckId         Int?
   odometer        Float?
   personalComment String?
+  // Ключ идемпотентности от клиента — повторная отправка той же формы
+  // (двойной клик, ретрай при потере ответа) не создаёт вторую запись.
+  idempotencyKey  String?  @unique
   totalCost       Float
   createdBy       Int
   createdAt       DateTime @default(now())

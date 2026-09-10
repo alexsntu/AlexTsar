@@ -1,4 +1,4 @@
-import type { PrismaClient, Truck } from "@prisma/client";
+import type { Prisma, PrismaClient, Truck } from "@prisma/client";
 import { round2 } from "../../lib/money.js";
 
 export interface MaintenancePartInput {
@@ -46,6 +46,82 @@ export async function createMaintenanceRecord(prisma: PrismaClient, params: Crea
     }
 
     return record;
+  });
+}
+
+export interface UpdateMaintenanceRecordParams {
+  truckId: number;
+  type: "SERVICE" | "REPAIR";
+  date: Date;
+  odometer: number;
+  description: string | null;
+  parts: MaintenancePartInput[];
+}
+
+/**
+ * Пересчитывает базу для расчёта следующего ТО (lastServiceDate/Odometer) из
+ * самой свежей оставшейся записи type=SERVICE этой машины. Если записей
+ * SERVICE не осталось совсем — базу НЕ трогаем: она могла быть выставлена
+ * вручную (кнопка "Настроить"), без привязки к конкретной записи в журнале,
+ * и стирать её только из-за того, что журнал опустел, не нужно.
+ */
+async function recomputeLastService(tx: Prisma.TransactionClient, truckId: number) {
+  const latestService = await tx.maintenanceRecord.findFirst({
+    where: { truckId, type: "SERVICE" },
+    orderBy: [{ date: "desc" }, { id: "desc" }],
+  });
+  if (latestService) {
+    await tx.truck.update({
+      where: { id: truckId },
+      data: { lastServiceDate: latestService.date, lastServiceOdometer: latestService.odometer },
+    });
+  }
+}
+
+export async function updateMaintenanceRecord(prisma: PrismaClient, recordId: number, params: UpdateMaintenanceRecordParams) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.maintenanceRecord.findUnique({ where: { id: recordId } });
+    if (!existing) return null;
+
+    const totalCost = round2(params.parts.reduce((sum, part) => sum + part.cost, 0));
+
+    // Полная замена списка запчастей — проще и надёжнее, чем сверять построчные diff'ы.
+    await tx.maintenancePart.deleteMany({ where: { recordId } });
+    const record = await tx.maintenanceRecord.update({
+      where: { id: recordId },
+      data: {
+        truckId: params.truckId,
+        type: params.type,
+        date: params.date,
+        odometer: params.odometer,
+        description: params.description,
+        totalCost,
+        parts: { create: params.parts.map((part) => ({ name: part.name, cost: part.cost })) },
+      },
+      include: { parts: true },
+    });
+
+    // Пересчитываем базу и для новой машины записи, и (если машину сменили) для старой —
+    // у обеих могла измениться самая свежая запись SERVICE.
+    await recomputeLastService(tx, params.truckId);
+    if (existing.truckId !== params.truckId) {
+      await recomputeLastService(tx, existing.truckId);
+    }
+
+    return record;
+  });
+}
+
+export async function deleteMaintenanceRecord(prisma: PrismaClient, recordId: number) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.maintenanceRecord.findUnique({ where: { id: recordId } });
+    if (!existing) return null;
+
+    await tx.maintenancePart.deleteMany({ where: { recordId } });
+    await tx.maintenanceRecord.delete({ where: { id: recordId } });
+    await recomputeLastService(tx, existing.truckId);
+
+    return existing;
   });
 }
 

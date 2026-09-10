@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { round2 } from "../../lib/money.js";
+import { mskDayStart, mskDayEnd } from "../../lib/date.js";
 import { InsufficientFuelError } from "../../lib/fifo.js";
-import { driverOwnsTruck, withdrawFuel } from "./service.js";
+import { driverOwnsTruck, withdrawFuel, IdempotencyConflictError } from "./service.js";
 
 const lotSchema = z
   .object({
@@ -16,7 +17,17 @@ const lotSchema = z
   })
   .refine((data) => data.pricePerLiter !== undefined || data.totalAmount !== undefined, {
     message: "Нужно указать цену за литр или общую сумму",
-  });
+  })
+  .refine(
+    (data) => {
+      // Если указаны и цена, и сумма — они не должны противоречить друг другу
+      // (иначе в остатках партии будет "неверная" сумма — см. ревью).
+      if (data.pricePerLiter === undefined || data.totalAmount === undefined) return true;
+      const expected = round2(data.liters * data.pricePerLiter);
+      return Math.abs(expected - round2(data.totalAmount)) <= 0.01;
+    },
+    { message: "Цена за литр и общая сумма не сходятся между собой (литры × цена ≠ сумма)" },
+  );
 
 const withdrawalSchema = z
   .object({
@@ -27,6 +38,8 @@ const withdrawalSchema = z
     truckId: z.number().int().positive().optional(),
     odometer: z.number().positive().optional(),
     personalComment: z.string().optional(),
+    // Защита от двойного списания при повторной отправке формы (двойной клик, ретрай).
+    idempotencyKey: z.string().min(10).max(100).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.isPersonal) {
@@ -73,6 +86,7 @@ export default async function fuelRoutes(fastify: FastifyInstance) {
         litersRemaining: data.liters,
         pricePerLiter,
         totalAmount,
+        valueRemaining: totalAmount,
         supplier: data.supplier,
         comment: data.comment,
         createdBy: request.user!.id,
@@ -80,10 +94,20 @@ export default async function fuelRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get("/api/fuel/lots", writeGuard, async (request) => {
-    const query = z.object({ fuelTypeId: z.coerce.number().int().positive().optional() }).parse(request.query);
+  fastify.get("/api/fuel/lots", writeGuard, async (request, reply) => {
+    const query = z
+      .object({
+        fuelTypeId: z.coerce.number().int().positive().optional(),
+        from: z.coerce.date().optional(),
+        to: z.coerce.date().optional(),
+      })
+      .safeParse(request.query);
+    if (!query.success) return reply.code(400).send({ error: "invalid_query" });
     return fastify.prisma.fuelLot.findMany({
-      where: query.fuelTypeId ? { fuelTypeId: query.fuelTypeId } : undefined,
+      where: {
+        fuelTypeId: query.data.fuelTypeId,
+        date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) },
+      },
       include: { fuelType: true },
       orderBy: [{ date: "desc" }, { id: "desc" }],
     });
@@ -116,11 +140,15 @@ export default async function fuelRoutes(fastify: FastifyInstance) {
         personalComment: data.isPersonal ? data.personalComment! : null,
         createdBy: user.id,
         tripId: null,
+        idempotencyKey: data.idempotencyKey ?? null,
       });
       return withdrawal;
     } catch (error) {
       if (error instanceof InsufficientFuelError) {
         return reply.code(409).send({ error: "insufficient_fuel", available: error.available, requested: error.requested });
+      }
+      if (error instanceof IdempotencyConflictError) {
+        return reply.code(409).send({ error: "idempotency_conflict" });
       }
       throw error;
     }
@@ -130,13 +158,14 @@ export default async function fuelRoutes(fastify: FastifyInstance) {
     const query = listWithdrawalsQuerySchema.parse(request.query);
     return fastify.prisma.fuelWithdrawal.findMany({
       where: {
-        date: { gte: query.from, lte: query.to },
+        date: { gte: mskDayStart(query.from), lt: mskDayEnd(query.to) },
         fuelTypeId: query.fuelTypeId,
         truckId: query.truckId,
         isPersonal: query.isPersonal,
       },
       include: { fuelType: true, truck: true },
-      orderBy: [{ date: "desc" }, { id: "desc" }],
+      // Для журнала заправок удобнее хронологический порядок (раньше — выше).
+      orderBy: [{ date: "asc" }, { id: "asc" }],
     });
   });
 }

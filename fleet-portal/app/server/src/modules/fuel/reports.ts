@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { round2 } from "../../lib/money.js";
+import { mskDayStart, mskDayEnd } from "../../lib/date.js";
 
 const periodQuerySchema = z.object({
   from: z.coerce.date().optional(),
@@ -26,7 +27,11 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
         value: 0,
       };
       entry.liters += lot.litersRemaining;
-      entry.value += lot.litersRemaining * lot.pricePerLiter;
+      // Единый источник стоимости остатка — valueRemaining, а не
+      // litersRemaining*pricePerLiter (после частичных списаний эти два
+      // расходятся, т.к. цена за литр округлена один раз при приходе — см.
+      // computeFifoConsumption в lib/fifo.ts).
+      entry.value += lot.valueRemaining;
       byFuelType.set(lot.fuelTypeId, entry);
     }
 
@@ -37,6 +42,38 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
     }));
   });
 
+  // ---------- Приход за период (по видам топлива) ----------
+  fastify.get("/api/fuel/reports/inflow", guard, async (request, reply) => {
+    const query = periodQuerySchema.safeParse(request.query);
+    if (!query.success) return reply.code(400).send({ error: "invalid_query" });
+
+    const lots = await fastify.prisma.fuelLot.findMany({
+      where: { date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) } },
+      include: { fuelType: true },
+    });
+
+    type Bucket = { fuelTypeId: number; fuelTypeName: string; liters: number; cost: number; count: number };
+    const buckets = new Map<number, Bucket>();
+    for (const lot of lots) {
+      const bucket = buckets.get(lot.fuelTypeId) ?? {
+        fuelTypeId: lot.fuelTypeId,
+        fuelTypeName: lot.fuelType.name,
+        liters: 0,
+        cost: 0,
+        count: 0,
+      };
+      bucket.liters += lot.litersIn;
+      bucket.cost += lot.totalAmount;
+      bucket.count += 1;
+      buckets.set(lot.fuelTypeId, bucket);
+    }
+
+    const rows = Array.from(buckets.values()).map((b) => ({ ...b, liters: round2(b.liters), cost: round2(b.cost) }));
+    const totals = rows.reduce((acc, r) => ({ liters: acc.liters + r.liters, cost: acc.cost + r.cost }), { liters: 0, cost: 0 });
+
+    return { rows, totals: { liters: round2(totals.liters), cost: round2(totals.cost) } };
+  });
+
   // ---------- Расход за период (бизнес vs личное) ----------
   fastify.get("/api/fuel/reports/consumption", guard, async (request, reply) => {
     const query = periodQuerySchema
@@ -45,7 +82,7 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
     if (!query.success) return reply.code(400).send({ error: "invalid_query" });
 
     const withdrawals = await fastify.prisma.fuelWithdrawal.findMany({
-      where: { date: { gte: query.data.from, lte: query.data.to } },
+      where: { date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) } },
       include: { fuelType: true, truck: true },
     });
 
@@ -56,6 +93,7 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
       companyCost: number;
       personalLiters: number;
       personalCost: number;
+      count: number;
     };
     const buckets = new Map<string, Bucket>();
 
@@ -74,6 +112,7 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
         companyCost: 0,
         personalLiters: 0,
         personalCost: 0,
+        count: 0,
       };
 
       if (w.isPersonal) {
@@ -83,6 +122,7 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
         bucket.companyLiters += w.liters;
         bucket.companyCost += w.totalCost;
       }
+      bucket.count += 1;
       buckets.set(mapKey, bucket);
     }
 
@@ -127,7 +167,7 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
         where: {
           truckId: query.data.truckId,
           isPersonal: false,
-          date: { gte: query.data.from, lte: query.data.to },
+          date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) },
         },
         orderBy: { date: "asc" },
       }),

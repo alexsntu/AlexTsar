@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- Сборка PWA-фронтенда ----------
-FROM node:20-alpine AS web-build
+FROM node:24-alpine AS web-build
 WORKDIR /app/web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
@@ -9,7 +9,7 @@ COPY web/ ./
 RUN npm run build
 
 # ---------- Сборка backend (с dev-зависимостями, для tsc и prisma generate) ----------
-FROM node:20-alpine AS server-build
+FROM node:24-alpine AS server-build
 RUN apk add --no-cache openssl
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
@@ -19,7 +19,7 @@ COPY server/ ./
 RUN npm run build
 
 # ---------- Только продакшн-зависимости backend ----------
-FROM node:20-alpine AS server-prod-deps
+FROM node:24-alpine AS server-prod-deps
 RUN apk add --no-cache openssl
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
@@ -27,7 +27,7 @@ COPY server/prisma ./prisma
 RUN npm ci --omit=dev
 
 # ---------- Итоговый лёгкий образ ----------
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 RUN apk add --no-cache openssl
 WORKDIR /app
 ENV NODE_ENV=production

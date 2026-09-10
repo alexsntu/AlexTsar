@@ -1,11 +1,57 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
+import { useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 
-export function Card({ title, children }: { title?: string; children: ReactNode }) {
+export function Card({
+  title,
+  children,
+  collapsible = false,
+  open,
+  defaultOpen = false,
+  onToggle,
+}: {
+  title?: string;
+  children: ReactNode;
+  /** Если true — карточка сворачивается/разворачивается по клику на заголовок. */
+  collapsible?: boolean;
+  /** Управляемое состояние (например, чтобы открыть форму программно при клике на запись). */
+  open?: boolean;
+  /** Начальное состояние, если open не задан (неуправляемый режим). */
+  defaultOpen?: boolean;
+  onToggle?: (open: boolean) => void;
+}) {
+  // Неуправляемый режим держит своё состояние внутри — если просто читать
+  // open ?? defaultOpen на каждый рендер без internal state, любой чужой
+  // ре-рендер родителя (например, набор текста в соседнем поле формы) сбросит
+  // разворот обратно в defaultOpen, потому что React считает open управляемым
+  // атрибутом и переустанавливает его каждый раз.
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+
+  if (!collapsible) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+        {title && <h2 className="text-lg font-semibold mb-3 text-slate-800">{title}</h2>}
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
-      {title && <h2 className="text-lg font-semibold mb-3 text-slate-800">{title}</h2>}
-      {children}
-    </div>
+    <details
+      className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 [&_summary::-webkit-details-marker]:hidden group"
+      open={isOpen}
+      onToggle={(e) => {
+        const next = e.currentTarget.open;
+        if (!isControlled) setInternalOpen(next);
+        onToggle?.(next);
+      }}
+    >
+      <summary className="text-lg font-semibold text-slate-800 cursor-pointer select-none list-none flex items-center gap-2">
+        <span className="text-slate-400 text-sm transition-transform group-open:rotate-90">▶</span>
+        {title}
+      </summary>
+      <div className="mt-3">{children}</div>
+    </details>
   );
 }
 

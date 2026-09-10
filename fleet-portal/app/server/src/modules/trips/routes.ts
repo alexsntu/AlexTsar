@@ -1,8 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { InsufficientFuelError } from "../../lib/fifo.js";
-import { withdrawFuel } from "../fuel/service.js";
-import { TRIP_STATUSES } from "../../types.js";
+import { withdrawFuel, IdempotencyConflictError } from "../fuel/service.js";
+import { TRIP_STATUSES, type TripStatus } from "../../types.js";
+
+// Разрешённые переходы статуса — под фактические кнопки в интерфейсе.
+// DONE/CANCELLED — конечные состояния: ни водитель, ни диспетчер не могут
+// вернуть рейс обратно через этот эндпоинт (был баг: водитель мог PATCH'ем
+// снова открыть уже завершённый рейс в обход ограничений интерфейса).
+const DRIVER_TRANSITIONS: Partial<Record<TripStatus, TripStatus[]>> = {
+  ASSIGNED: ["IN_PROGRESS"],
+  IN_PROGRESS: ["DONE"],
+};
+const TERMINAL_STATUSES: TripStatus[] = ["DONE", "CANCELLED"];
 
 const tripSchema = z.object({
   date: z.coerce.date(),
@@ -27,6 +37,7 @@ const tripFuelSchema = z.object({
   date: z.coerce.date(),
   liters: z.number().positive(),
   odometer: z.number().positive().optional(),
+  idempotencyKey: z.string().min(10).max(100).optional(),
 });
 
 export default async function tripsRoutes(fastify: FastifyInstance) {
@@ -83,7 +94,24 @@ export default async function tripsRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "not_your_trip" });
     }
 
-    return fastify.prisma.trip.update({ where: { id: tripId }, data: { status: parsed.data.status } });
+    const currentStatus = trip.status as TripStatus;
+    const nextStatus = parsed.data.status;
+
+    if (TERMINAL_STATUSES.includes(currentStatus)) {
+      return reply.code(409).send({ error: "trip_already_closed" });
+    }
+
+    if (user.role === "DRIVER") {
+      const allowed = DRIVER_TRANSITIONS[currentStatus] ?? [];
+      if (!allowed.includes(nextStatus)) {
+        return reply.code(409).send({ error: "invalid_status_transition" });
+      }
+    } else if (!TERMINAL_STATUSES.includes(nextStatus)) {
+      // Диспетчер/админ сейчас в интерфейсе может только завершить или отменить рейс.
+      return reply.code(409).send({ error: "invalid_status_transition" });
+    }
+
+    return fastify.prisma.trip.update({ where: { id: tripId }, data: { status: nextStatus } });
   });
 
   // ---------- Заправка прямо из рейса (короткий путь для водителя) ----------
@@ -114,10 +142,14 @@ export default async function tripsRoutes(fastify: FastifyInstance) {
         personalComment: null,
         createdBy: user.id,
         tripId: trip.id,
+        idempotencyKey: parsed.data.idempotencyKey ?? null,
       });
     } catch (error) {
       if (error instanceof InsufficientFuelError) {
         return reply.code(409).send({ error: "insufficient_fuel", available: error.available, requested: error.requested });
+      }
+      if (error instanceof IdempotencyConflictError) {
+        return reply.code(409).send({ error: "idempotency_conflict" });
       }
       throw error;
     }

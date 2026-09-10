@@ -8,6 +8,15 @@ const COOKIE_NAME = "fleet_token";
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 дней (по умолчанию, без "запомнить меня")
 const REMEMBER_TTL_SECONDS = 60 * 60 * 24 * 365; // 1 год (с "запомнить меня")
 
+// Токен несёт только id и версию сессии — роль, активность и driverId сервер
+// каждый раз перечитывает из базы (см. authenticate ниже), а не доверяет им из JWT.
+// Так блокировка пользователя/водителя и смена пароля (см. tokenVersion) реально
+// обрывают ранее выданные сессии, а не только curent /api/auth/me.
+export interface AuthTokenPayload {
+  id: number;
+  tokenVersion: number;
+}
+
 export interface AuthUser {
   id: number;
   role: Role;
@@ -24,8 +33,8 @@ declare module "fastify" {
   }
 }
 
-export function signAuthToken(user: AuthUser, remember: boolean): string {
-  return jwt.sign(user, env.jwtSecret, { expiresIn: remember ? REMEMBER_TTL_SECONDS : TOKEN_TTL_SECONDS });
+export function signAuthToken(payload: AuthTokenPayload, remember: boolean): string {
+  return jwt.sign(payload, env.jwtSecret, { expiresIn: remember ? REMEMBER_TTL_SECONDS : TOKEN_TTL_SECONDS });
 }
 
 export function setAuthCookie(reply: FastifyReply, token: string, remember: boolean) {
@@ -48,12 +57,29 @@ export default fp(async function authPlugin(fastify: FastifyInstance) {
     if (!token) {
       return reply.code(401).send({ error: "unauthorized" });
     }
+
+    let payload: AuthTokenPayload;
     try {
-      const payload = jwt.verify(token, env.jwtSecret) as AuthUser;
-      request.user = payload;
+      payload = jwt.verify(token, env.jwtSecret) as AuthTokenPayload;
     } catch {
       return reply.code(401).send({ error: "unauthorized" });
     }
+
+    const user = await fastify.prisma.user.findUnique({ where: { id: payload.id } });
+    if (!user || !user.isActive || user.tokenVersion !== payload.tokenVersion) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+
+    // Для водителя дополнительно проверяем, что сам водитель ещё активен
+    // (архивный водитель не должен сохранять доступ через старый логин).
+    if (user.driverId !== null) {
+      const driver = await fastify.prisma.driver.findUnique({ where: { id: user.driverId } });
+      if (!driver || !driver.isActive) {
+        return reply.code(401).send({ error: "unauthorized" });
+      }
+    }
+
+    request.user = { id: user.id, role: user.role as Role, driverId: user.driverId };
   });
 
   fastify.decorate("requireRole", function (roles: Role[]) {

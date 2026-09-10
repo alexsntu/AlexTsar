@@ -6,9 +6,12 @@ import { env } from "./env.js";
 const prisma = new PrismaClient();
 
 async function main() {
-  const existing = await prisma.user.findUnique({ where: { email: env.adminEmail } });
+  // Ищем ЛЮБОГО администратора, а не только с текущим ADMIN_EMAIL — иначе
+  // смена ADMIN_EMAIL в .env и перезапуск создаст второго админа вместо
+  // переименования первого (которое так и так не задача сидирования).
+  const existing = await prisma.user.findFirst({ where: { role: "ADMIN" } });
   if (existing) {
-    console.log(`Админ ${env.adminEmail} уже существует, пропускаю сидирование`);
+    console.log(`Администратор уже существует (${existing.email}), пропускаю сидирование`);
     return;
   }
 
