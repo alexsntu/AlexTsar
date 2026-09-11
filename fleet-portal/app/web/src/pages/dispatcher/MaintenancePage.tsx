@@ -10,7 +10,7 @@ import type {
   UpcomingService,
 } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table, Textarea } from "../../components/ui";
-import { toLocalDateString, todayLocalDateString } from "../../lib/date";
+import { formatShortDate, toLocalDateString, todayLocalDateString } from "../../lib/date";
 
 const TABS = ["Дашборд", "Журнал", "Отчёты"] as const;
 type Tab = (typeof TABS)[number];
@@ -123,6 +123,31 @@ function ExpiryCell({ dateStr, warningLabel }: { dateStr: string | null; warning
   );
 }
 
+/**
+ * Последнее ТО — общий кусок для таблицы (десктоп) и карточки (мобильный).
+ * Пробег показываем всегда (даже без даты); дата раскрывается по клику на пробег,
+ * чтобы не загромождать таблицу и не терять данные, когда дату не указали.
+ */
+function LastServiceCell({ truck }: { truck: Truck }) {
+  const [showDate, setShowDate] = useState(false);
+  const odometer = truck.lastServiceOdometer;
+  const date = truck.lastServiceDate;
+
+  if (odometer == null && !date) return <span className="text-slate-400">—</span>;
+
+  return (
+    <button
+      type="button"
+      onClick={() => setShowDate((v) => !v)}
+      className="text-left hover:underline decoration-dotted underline-offset-2"
+      title={date ? "Нажмите, чтобы показать/скрыть дату ТО" : undefined}
+    >
+      {odometer != null ? `${fmt(odometer)} км` : "—"}
+      {date && showDate && <span className="block text-xs text-slate-400">{formatShortDate(date)}</span>}
+    </button>
+  );
+}
+
 /** Осталось до ТО — общий кусок для таблицы (десктоп) и карточки (мобильный). */
 function RemainingCell({ hasSchedule, info }: { hasSchedule: boolean | number | null | undefined; info: UpcomingService | undefined }) {
   if (!hasSchedule) return <span className="text-slate-400">интервал не задан</span>;
@@ -172,9 +197,7 @@ function UpcomingSection() {
                   {truck.serviceIntervalDays ? ` / ${truck.serviceIntervalDays} дн.` : ""}
                 </td>
                 <td className="py-2 pr-4 align-top">
-                  {truck.lastServiceDate
-                    ? `${truck.lastServiceDate.slice(0, 10)} (${fmt(truck.lastServiceOdometer ?? 0)} км)`
-                    : "—"}
+                  <LastServiceCell truck={truck} />
                 </td>
                 <td className="py-2 pr-4 align-top">{info?.currentOdometer != null ? `${fmt(info.currentOdometer)} км` : "—"}</td>
                 <td className="py-2 pr-4 align-top">
@@ -227,9 +250,7 @@ function UpcomingSection() {
                 <div className="flex justify-between gap-3">
                   <dt className="text-slate-500 shrink-0">Последнее ТО</dt>
                   <dd className="text-right">
-                    {truck.lastServiceDate
-                      ? `${truck.lastServiceDate.slice(0, 10)} (${fmt(truck.lastServiceOdometer ?? 0)} км)`
-                      : "—"}
+                    <LastServiceCell truck={truck} />
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">

@@ -13,3 +13,15 @@ export function toLocalDateString(date: Date): string {
 export function todayLocalDateString(): string {
   return toLocalDateString(new Date());
 }
+
+const SHORT_MONTHS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сент", "окт", "ноя", "дек"];
+
+/**
+ * Короткая дата вида "11 сент 26" из строки "YYYY-MM-DD" (или ISO с временем — используются
+ * только первые 10 символов). Разбираем строку вручную, а не через `new Date(str)`, чтобы не
+ * словить сдвиг из-за UTC (см. toLocalDateString).
+ */
+export function formatShortDate(dateStr: string): string {
+  const [year, month, day] = dateStr.slice(0, 10).split("-");
+  return `${Number(day)} ${SHORT_MONTHS[Number(month) - 1]} ${year.slice(2)}`;
+}
