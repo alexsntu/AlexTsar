@@ -500,11 +500,15 @@ function WithdrawalsSection() {
         personalComment: isPersonal ? personalComment : undefined,
         idempotencyKey,
       });
+      const recipient = isPersonal
+        ? `личное авто (${personalComment})`
+        : trucks?.find((t) => String(t.id) === truckId)?.name ?? "машина";
       setLiters("");
       setOdometer("");
       setPersonalComment("");
       setIdempotencyKey(crypto.randomUUID());
       await Promise.all([reload(), reloadBalance()]);
+      window.alert(`Заправка добавлена: ${liters} л, ${recipient}`);
     } catch (err) {
       setError(describeError(err));
     } finally {
