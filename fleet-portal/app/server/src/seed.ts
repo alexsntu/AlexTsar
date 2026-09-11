@@ -130,6 +130,12 @@ async function seedOrgProfiles() {
 // тариф пользователь внесёт сам через UI.
 const BASE_RATE_DATE = new Date("2026-01-01T00:00:00.000Z");
 const JULY_CHANGE_DATE = new Date("2026-07-21T00:00:00.000Z");
+// Сверка с присланным пользователем актуальным файлом "Цены.xlsx"
+// (2026-09-11): 5 расхождений с тем, что было в справочнике — новый тариф
+// вносим отдельной строкой с 1.08.2026 (для 4 адресов, которых не было ни в
+// одном из июльских файлов, тариф до этой даты просто не был известен; для
+// 82/39 — реальное снижение обратно с 9.76 до 4.95).
+const AUGUST_CHANGE_DATE = new Date("2026-08-01T00:00:00.000Z");
 
 const RATES_4_95 = [
   "82/1", "82/10", "82/11", "82/13", "82/15", "82/16", "82/2", "82/21", "82/25-1",
@@ -141,6 +147,11 @@ const RATES_6_1 = ["82/26", "82/31"];
 const RATES_6_1_TO_9_76 = ["82/12", "82/20", "82/22", "82/28", "82/30", "82/32", "82/38", "82/44", "82/47", "82/48"];
 // 4.95 -> 9.76 с 21.07.2026 (единственный такой адрес в данных)
 const RATES_4_95_TO_9_76 = ["82/39"];
+// Не встречались ни в одном из июльских файлов — тариф известен только из
+// "Цены.xlsx", с 1.08.2026.
+const RATES_FROM_AUGUST_4_95 = ["82/8", "82/19", "82/23", "82/45"];
+// 82/39: 9.76 (с 21.07) -> 4.95 (с 1.08) — реальное снижение по "Цены.xlsx".
+const RATE_82_39_AUGUST = 4.95;
 
 async function seedAddressRates() {
   const count = await prisma.addressRate.count();
@@ -161,10 +172,18 @@ async function seedAddressRates() {
     await prisma.addressRate.create({ data: { addressId: address.id, pricePerKg: 9.76, effectiveFrom: JULY_CHANGE_DATE } });
   }
 
+  async function addRate(code: string, pricePerKg: number, effectiveFrom: Date) {
+    const address = await prisma.address.findUnique({ where: { fullAddress: ADDRESSES.find((a) => a.code === code)!.fullAddress } });
+    if (!address) return;
+    await prisma.addressRate.create({ data: { addressId: address.id, pricePerKg, effectiveFrom } });
+  }
+
   for (const code of RATES_4_95) await addBaseRate(code, 4.95);
   for (const code of RATES_6_1) await addBaseRate(code, 6.1);
   for (const code of RATES_6_1_TO_9_76) await addChangedRate(code, 6.1);
   for (const code of RATES_4_95_TO_9_76) await addChangedRate(code, 4.95);
+  for (const code of RATES_FROM_AUGUST_4_95) await addRate(code, 4.95, AUGUST_CHANGE_DATE);
+  await addRate("82/39", RATE_82_39_AUGUST, AUGUST_CHANGE_DATE);
 
   console.log("Загружены тарифы, выведенные из июльских данных");
 }
