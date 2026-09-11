@@ -7,6 +7,7 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import rateLimit from "@fastify/rate-limit";
+import multipart from "@fastify/multipart";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { env } from "./env.js";
@@ -19,6 +20,7 @@ import fuelReportsRoutes from "./modules/fuel/reports.js";
 import tripsRoutes from "./modules/trips/routes.js";
 import maintenanceRoutes from "./modules/maintenance/routes.js";
 import maintenanceReportsRoutes from "./modules/maintenance/reports.js";
+import documentsRoutes from "./modules/documents/routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(__dirname, "../public");
@@ -128,6 +130,9 @@ async function main() {
   // По умолчанию лимит не применяется — включаем точечно на /api/auth/login
   // (config.rateLimit), чтобы не мешать обычной работе с API.
   await fastify.register(rateLimit, { global: false });
+  // Загрузка файла-расшифровки от заказчика (модуль documents) — xlsx-примеры
+  // весят 30-110 КБ, лимит с большим запасом на случай файла побольше.
+  await fastify.register(multipart, { limits: { fileSize: 20 * 1024 * 1024 } });
   await fastify.register(prismaPlugin);
   await fastify.register(authPlugin);
 
@@ -138,6 +143,7 @@ async function main() {
   await fastify.register(tripsRoutes);
   await fastify.register(maintenanceRoutes);
   await fastify.register(maintenanceReportsRoutes);
+  await fastify.register(documentsRoutes);
 
   // Раздача собранного PWA-фронтенда (см. app/Dockerfile) + SPA-fallback на index.html
   await fastify.register(fastifyStatic, {

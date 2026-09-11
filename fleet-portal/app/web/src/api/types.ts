@@ -184,3 +184,117 @@ export interface Trip {
   status: TripStatus;
   notes: string | null;
 }
+
+// ---------- Документы: акты/реестр/счёт по перевозкам ----------
+
+export interface AddressRate {
+  id: number;
+  addressId: number;
+  pricePerKg: number;
+  effectiveFrom: string;
+}
+
+export interface Address {
+  id: number;
+  code: string | null;
+  fullAddress: string;
+  city: string;
+  isActive: boolean;
+  rates: AddressRate[];
+}
+
+export type OrgRole = "SUPPLIER" | "BUYER";
+
+export interface OrgProfile {
+  id: number;
+  role: OrgRole;
+  name: string;
+  inn: string;
+  kpp: string | null;
+  legalAddress: string;
+  phone: string | null;
+  bankName: string | null;
+  bankAccount: string | null;
+  bik: string | null;
+  corrAccount: string | null;
+  dispatchPoint: string | null;
+  contractNumber: string | null;
+  contractDate: string | null;
+  contractIgk: string | null;
+}
+
+export interface ImportBatch {
+  id: number;
+  periodFrom: string;
+  periodTo: string;
+  sourceFileName: string;
+  rowCount: number;
+  totalMassKg: number;
+  totalCost: number;
+  createdAt: string;
+}
+
+export interface ImportRowError {
+  rowNumber: number;
+  date: string;
+  addressText: string;
+  message: string;
+}
+
+export interface ImportAcceptedResult {
+  accepted: true;
+  batch: ImportBatch;
+}
+export interface ImportRejectedResult {
+  accepted: false;
+  errors: ImportRowError[];
+}
+export interface NeedsSheetSelection {
+  needsSheetSelection: true;
+  sheets: string[];
+  suggested: string;
+}
+export type ImportResult = ImportAcceptedResult | ImportRejectedResult | NeedsSheetSelection;
+
+export interface DayActLine {
+  index: number;
+  service: string;
+  dispatchPoint: string;
+  deliveryAddress: string;
+  truckPlate: string;
+  ratePerKg: number;
+  massKg: number;
+  cost: number;
+}
+
+export interface DayAct {
+  actNumber: number;
+  date: string;
+  lines: DayActLine[];
+  totalMassKg: number;
+  totalCost: number;
+}
+
+export interface RouteSummaryRow {
+  truckPlate: string;
+  totalMassKg: number;
+  totalDistanceKm: number;
+  deliveryDates: string[];
+}
+
+export interface MonthSummaryLine {
+  ratePerKg: number;
+  massKg: number;
+  cost: number;
+  minDate: string;
+  maxDate: string;
+}
+
+export interface MonthClosing {
+  id: number;
+  yearMonth: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  finalActNumber: number;
+  finalActDate: string;
+}

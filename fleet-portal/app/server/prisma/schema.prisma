@@ -167,3 +167,110 @@ model MaintenancePart {
   name     String
   cost     Float
 }
+
+// ---------- Документы: акты/реестр/счёт по перевозкам для заказчика ----------
+
+model Address {
+  id          Int           @id @default(autoincrement())
+  code        String?
+  fullAddress String        @unique
+  // Группировка/сортировка в справочнике — берём как есть из колонки
+  // "Направление" исходного файла заказчика (не используется для тарифов,
+  // только для удобства навигации по списку адресов).
+  city        String
+  isActive    Boolean       @default(true)
+  rates       AddressRate[]
+  deliveries  Delivery[]
+  createdAt   DateTime      @default(now())
+
+  @@index([city])
+}
+
+model AddressRate {
+  id            Int      @id @default(autoincrement())
+  address       Address  @relation(fields: [addressId], references: [id])
+  addressId     Int
+  pricePerKg    Float
+  // Тариф действует с этой даты (включительно) до effectiveFrom следующей
+  // по времени строки этого же адреса — тариф на конкретный адрес может
+  // меняться в течение месяца, проверка всегда берёт тариф, действовавший
+  // на дату конкретного рейса, а не "текущий".
+  effectiveFrom DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([addressId, effectiveFrom])
+}
+
+// Две строки-синглтона: role="SUPPLIER" (Исполнитель/Поставщик) и
+// role="BUYER" (Заказчик/Покупатель) — редактируемые реквизиты для шапок
+// актов и счёта. kpp и договорные поля релевантны в основном для BUYER,
+// банковские реквизиты и dispatchPoint — для SUPPLIER.
+model OrgProfile {
+  id             Int       @id @default(autoincrement())
+  role           String    @unique
+  name           String
+  inn            String
+  kpp            String?
+  legalAddress   String
+  phone          String?
+  bankName       String?
+  bankAccount    String?
+  bik            String?
+  corrAccount    String?
+  // "Точка отправки" в акте — фиксированный адрес склада-отправителя.
+  dispatchPoint  String?
+  contractNumber String?
+  contractDate   DateTime?
+  contractIgk    String?
+  updatedAt      DateTime  @updatedAt
+}
+
+model ImportBatch {
+  id             Int        @id @default(autoincrement())
+  periodFrom     DateTime
+  periodTo       DateTime
+  sourceFileName String
+  rowCount       Int
+  totalMassKg    Float
+  totalCost      Float
+  createdBy      Int
+  createdAt      DateTime   @default(now())
+  deliveries     Delivery[]
+
+  @@index([periodFrom, periodTo])
+}
+
+model Delivery {
+  id            Int         @id @default(autoincrement())
+  importBatch   ImportBatch @relation(fields: [importBatchId], references: [id])
+  importBatchId Int
+  date          DateTime
+  address       Address     @relation(fields: [addressId], references: [id])
+  addressId     Int
+  truckPlate    String
+  distanceKm    Float
+  massKg        Float
+  // Тариф, применённый при проверке этой строки (для аудита — при генерации
+  // документов используем именно его, а не пересчитываем заново).
+  ratePerKg     Float
+  cost          Float
+  createdAt     DateTime    @default(now())
+
+  @@index([date])
+  @@index([truckPlate, date])
+}
+
+// Создаётся один раз при закрытии месяца — фиксирует номер/дату счёта
+// (вводятся вручную, истории для автонумерации нет) и производные
+// номер/дату итогового акта, на которые ссылаются реестр, итоговый акт и
+// счёт за этот месяц.
+model MonthClosing {
+  id             Int      @id @default(autoincrement())
+  yearMonth      String   @unique
+  invoiceNumber  String
+  invoiceDate    DateTime
+  finalActNumber Int
+  finalActDate   DateTime
+  createdBy      Int
+  createdAt      DateTime @default(now())
+}
