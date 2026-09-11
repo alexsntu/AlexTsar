@@ -468,8 +468,20 @@ function InOutDashboard() {
 function WithdrawalsSection() {
   const { data: fuelTypes } = useApi<FuelType[]>("/api/fuel-types");
   const { data: trucks } = useApi<Truck[]>("/api/trucks");
-  const { data: withdrawals, reload } = useApi<FuelWithdrawal[]>("/api/fuel/withdrawals");
   const { data: balance, reload: reloadBalance } = useApi<FuelBalanceRow[]>("/api/fuel/reports/balance");
+
+  // Фильтр журнала заправок ниже — по машине и/или месяцу; пусто = без фильтра.
+  const [filterTruckId, setFilterTruckId] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const withdrawalsQuery = new URLSearchParams();
+  if (filterTruckId) withdrawalsQuery.set("truckId", filterTruckId);
+  if (filterMonth) {
+    const { from, to } = monthToRange(filterMonth);
+    withdrawalsQuery.set("from", from);
+    withdrawalsQuery.set("to", to);
+  }
+  const withdrawalsPath = `/api/fuel/withdrawals${withdrawalsQuery.toString() ? `?${withdrawalsQuery.toString()}` : ""}`;
+  const { data: withdrawals, reload } = useApi<FuelWithdrawal[]>(withdrawalsPath);
 
   const [fuelTypeId, setFuelTypeId] = useState("");
   const [date, setDate] = useState(() => todayLocalDateString());
@@ -584,6 +596,37 @@ function WithdrawalsSection() {
         </Button>
       </form>
       <ErrorText>{error}</ErrorText>
+      <div className="flex gap-2 items-end mb-3 flex-wrap">
+        <div className="w-44">
+          <Field label="Машина">
+            <Select value={filterTruckId} onChange={(e) => setFilterTruckId(e.target.value)}>
+              <option value="">Все машины</option>
+              {(trucks ?? []).map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.plateNumber})
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <div className="w-40">
+          <Field label="Месяц">
+            <Input type="month" value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} />
+          </Field>
+        </div>
+        {(filterTruckId || filterMonth) && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setFilterTruckId("");
+              setFilterMonth("");
+            }}
+          >
+            Сбросить
+          </Button>
+        )}
+      </div>
       <Table head={["Дата", "Вид топлива", "Литры", "Сумма", "Получатель"]}>
         {(withdrawals ?? []).map((w) => (
           <tr key={w.id}>
