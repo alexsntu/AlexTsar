@@ -5,7 +5,7 @@ import { useApi } from "../../hooks/useApi";
 import type { Driver, Trip, TripStatus, Truck } from "../../api/types";
 import { TRIP_STATUS_LABELS } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
-import { todayLocalDateString } from "../../lib/date";
+import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
 const STATUS_TONE: Record<TripStatus, "slate" | "green" | "amber" | "red"> = {
   ASSIGNED: "slate",
@@ -110,7 +110,7 @@ export function TripsPage() {
         <Table head={["Дата", "Водитель", "Машина", "Маршрут", "Груз", "Статус", ""]}>
           {(trips ?? []).map((trip) => (
             <tr key={trip.id}>
-              <td className="py-2 pr-4">{trip.date.slice(0, 10)}</td>
+              <td className="py-2 pr-4">{formatShortDate(trip.date)}</td>
               <td className="py-2 pr-4">{trip.driver?.fullName}</td>
               <td className="py-2 pr-4">
                 {trip.truck?.name} ({trip.truck?.plateNumber})

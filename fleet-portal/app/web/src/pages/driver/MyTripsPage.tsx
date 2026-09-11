@@ -5,7 +5,7 @@ import { useApi } from "../../hooks/useApi";
 import type { FuelType, Trip, TripStatus } from "../../api/types";
 import { TRIP_STATUS_LABELS } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select } from "../../components/ui";
-import { todayLocalDateString } from "../../lib/date";
+import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
 const STATUS_TONE: Record<TripStatus, "slate" | "green" | "amber" | "red"> = {
   ASSIGNED: "slate",
@@ -106,7 +106,7 @@ export function MyTripsPage() {
                 <p className="font-semibold text-slate-800">
                   {trip.routeFrom} → {trip.routeTo}
                 </p>
-                <p className="text-sm text-slate-500">{trip.date.slice(0, 10)}</p>
+                <p className="text-sm text-slate-500">{formatShortDate(trip.date)}</p>
                 <p className="text-sm text-slate-500">
                   {trip.truck?.name} ({trip.truck?.plateNumber})
                 </p>

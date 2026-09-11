@@ -13,7 +13,7 @@ import type {
   Truck,
 } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
-import { todayLocalDateString } from "../../lib/date";
+import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
 const TABS = ["Приход", "Заправки", "Отчёты"] as const;
 type Tab = (typeof TABS)[number];
@@ -143,7 +143,7 @@ function LotsSection() {
         <Table head={["Дата", "Вид топлива", "Приход, л", "Цена/л", "Сумма", "Остаток, л"]}>
           {(lots ?? []).map((lot) => (
             <tr key={lot.id}>
-              <td className="py-2 pr-4">{lot.date.slice(0, 10)}</td>
+              <td className="py-2 pr-4">{formatShortDate(lot.date)}</td>
               <td className="py-2 pr-4">{lot.fuelType?.name}</td>
               <td className="py-2 pr-4">{fmt(lot.litersIn)}</td>
               <td className="py-2 pr-4">{fmt(lot.pricePerLiter)}</td>
@@ -288,7 +288,7 @@ function FuelDashboard() {
             <Table head={["Дата", "Литры", "Сумма, ₽", "Одометр"]}>
               {truckDetails.map((w) => (
                 <tr key={w.id}>
-                  <td className="py-2 pr-4">{w.date.slice(0, 10)}</td>
+                  <td className="py-2 pr-4">{formatShortDate(w.date)}</td>
                   <td className="py-2 pr-4">{fmt(w.liters)}</td>
                   <td className="py-2 pr-4">{fmt(w.totalCost)} ₽</td>
                   <td className="py-2 pr-4">{w.odometer != null ? `${fmt(w.odometer)} км` : "—"}</td>
@@ -448,7 +448,7 @@ function InOutDashboard() {
                 <Table head={["Дата", "Вид топлива", "Литры", "Цена/л", "Сумма"]}>
                   {lots.map((lot) => (
                     <tr key={lot.id}>
-                      <td className="py-2 pr-4">{lot.date.slice(0, 10)}</td>
+                      <td className="py-2 pr-4">{formatShortDate(lot.date)}</td>
                       <td className="py-2 pr-4">{lot.fuelType?.name}</td>
                       <td className="py-2 pr-4">{fmt(lot.litersIn)}</td>
                       <td className="py-2 pr-4">{fmt(lot.pricePerLiter)} ₽</td>
@@ -587,7 +587,7 @@ function WithdrawalsSection() {
       <Table head={["Дата", "Вид топлива", "Литры", "Сумма", "Получатель"]}>
         {(withdrawals ?? []).map((w) => (
           <tr key={w.id}>
-            <td className="py-2 pr-4">{w.date.slice(0, 10)}</td>
+            <td className="py-2 pr-4">{formatShortDate(w.date)}</td>
             <td className="py-2 pr-4">{w.fuelType?.name}</td>
             <td className="py-2 pr-4">{fmt(w.liters)}</td>
             <td className="py-2 pr-4">{fmt(w.totalCost)}</td>

@@ -113,7 +113,7 @@ function ExpiryCell({ dateStr, warningLabel }: { dateStr: string | null; warning
   const urgent = days !== null && days <= EXPIRY_WARNING_DAYS;
   return (
     <div>
-      <span className={urgent ? "text-red-600 font-bold" : ""}>{dateStr.slice(0, 10)}</span>
+      <span className={urgent ? "text-red-600 font-bold" : ""}>{formatShortDate(dateStr)}</span>
       {urgent && (
         <div className="text-red-600 font-bold text-xs mt-0.5">
           {days !== null && days <= 0 ? `Просрочено! ${warningLabel}` : warningLabel}
@@ -396,7 +396,7 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
   }
 
   async function handleDelete(record: MaintenanceRecord) {
-    if (!window.confirm(`Удалить запись «${record.type === "SERVICE" ? "ТО" : "Ремонт"}» от ${record.date.slice(0, 10)}? Это необратимо.`)) return;
+    if (!window.confirm(`Удалить запись «${record.type === "SERVICE" ? "ТО" : "Ремонт"}» от ${formatShortDate(record.date)}? Это необратимо.`)) return;
     try {
       await api.delete(`/api/maintenance/records/${record.id}`);
       if (editingRecordId === record.id) resetForm();
@@ -581,7 +581,7 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
               className={`cursor-pointer hover:bg-slate-50 ${editingRecordId === r.id ? "bg-sky-50" : ""}`}
               title="Открыть запись"
             >
-              <td className="py-2 pr-4">{r.date.slice(0, 10)}</td>
+              <td className="py-2 pr-4">{formatShortDate(r.date)}</td>
               <td className="py-2 pr-4">
                 {r.truck?.name} ({r.truck?.plateNumber})
               </td>
