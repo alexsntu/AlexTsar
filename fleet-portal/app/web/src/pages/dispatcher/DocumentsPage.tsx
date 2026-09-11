@@ -3,7 +3,7 @@ import { api } from "../../api/client";
 import { describeError } from "../../api/errors";
 import { useApi } from "../../hooks/useApi";
 import type { DayAct, ImportBatch, ImportResult, MonthClosing, MonthSummaryLine, RouteSummaryRow } from "../../api/types";
-import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
+import { Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
 import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
 const TABS = ["Импорт", "Итоги маршрутов", "Журнал"] as const;
