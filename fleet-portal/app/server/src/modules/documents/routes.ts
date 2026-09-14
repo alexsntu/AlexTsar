@@ -32,6 +32,8 @@ const orgProfileSchema = z.object({
   contractNumber: z.string().max(100).optional(),
   contractDate: z.coerce.date().optional(),
   contractIgk: z.string().max(100).optional(),
+  invoiceSupplierLine: z.string().max(500).optional(),
+  shortName: z.string().max(200).optional(),
 });
 
 const monthClosingSchema = z.object({

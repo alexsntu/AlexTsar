@@ -221,6 +221,8 @@ export interface OrgProfile {
   contractNumber: string | null;
   contractDate: string | null;
   contractIgk: string | null;
+  invoiceSupplierLine: string | null;
+  shortName: string | null;
 }
 
 export interface ImportBatch {

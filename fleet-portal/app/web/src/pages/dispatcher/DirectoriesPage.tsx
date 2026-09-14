@@ -442,6 +442,7 @@ function AddressesSection() {
 
 const ORG_PROFILE_FIELDS: Array<{ key: keyof OrgProfile; label: string; wide?: boolean; type?: string }> = [
   { key: "name", label: "Название" },
+  { key: "shortName", label: "Краткое ФИО для подписей (напр. «ИП Царюк А. Б.»)", wide: true },
   { key: "inn", label: "ИНН" },
   { key: "kpp", label: "КПП" },
   { key: "phone", label: "Телефон" },
@@ -454,6 +455,7 @@ const ORG_PROFILE_FIELDS: Array<{ key: keyof OrgProfile; label: string; wide?: b
   { key: "contractNumber", label: "№ договора" },
   { key: "contractDate", label: "Дата договора", type: "date" },
   { key: "contractIgk", label: "ИГК контракта", wide: true },
+  { key: "invoiceSupplierLine", label: "Поле «Поставщик» в счёте", wide: true },
 ];
 
 function OrgProfileForm({ role, profile, onDone }: { role: OrgRole; profile: OrgProfile | undefined; onDone: () => void }) {
