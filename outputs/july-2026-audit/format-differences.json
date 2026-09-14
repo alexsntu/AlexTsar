@@ -1,0 +1,4144 @@
+{
+  "days": [
+    {
+      "sheet": "Акт №1 2026-07-01",
+      "referenceSheet": "Лист 1",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G25",
+          "changes": {
+            "value": {
+              "reference": 208385.4775,
+              "generated": 208385.48
+            }
+          }
+        },
+        {
+          "cell": "B29",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 9, на сумму 208 385,48 руб.",
+              "generated": "Всего оказано услуг 9, на сумму 208 385,48 руб."
+            }
+          }
+        },
+        {
+          "cell": "C37",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F37",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I42"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I42"
+        }
+      },
+      "merges": {
+        "reference": [
+          "B32:F34",
+          "F37:G37",
+          "F41:G41",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F27:G27",
+          "B29:E29",
+          "B30:H31"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F27:G27",
+          "B29:E29",
+          "B30:H31",
+          "B32:F34",
+          "F37:G37",
+          "F41:G41"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №2 2026-07-02",
+      "referenceSheet": "Лист 2",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G22",
+          "changes": {
+            "value": {
+              "reference": 194090.26084999996,
+              "generated": 194090.26
+            }
+          }
+        },
+        {
+          "cell": "B26",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 6, на сумму 194 090,26 руб.",
+              "generated": "Всего оказано услуг 6, на сумму 194 090,26 руб."
+            }
+          }
+        },
+        {
+          "cell": "C34",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F38:G38",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34",
+          "F38:G38"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №3 2026-07-03",
+      "referenceSheet": "Лист 3",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G22",
+          "changes": {
+            "value": {
+              "reference": 190451.7526,
+              "generated": 190451.75
+            }
+          }
+        },
+        {
+          "cell": "B26",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 6, на сумму 190 451,75 руб.",
+              "generated": "Всего оказано услуг 6, на сумму 190 451,75 руб."
+            }
+          }
+        },
+        {
+          "cell": "C34",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F38:G38",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34",
+          "F38:G38"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №4 2026-07-05",
+      "referenceSheet": "Лист 4",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G17",
+          "changes": {
+            "value": {
+              "reference": 27838.448,
+              "generated": 27838.45
+            }
+          }
+        },
+        {
+          "cell": "B21",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 1, на сумму 27 838,45 руб.",
+              "generated": "Всего оказано услуг 1, на сумму 27 838,45 руб."
+            }
+          }
+        },
+        {
+          "cell": "C29",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F29",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I34"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I34"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F33:G33",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F19:G19",
+          "B21:E21",
+          "B22:H23",
+          "B24:F26",
+          "F29:G29"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F19:G19",
+          "B21:E21",
+          "B22:H23",
+          "B24:F26",
+          "F29:G29",
+          "F33:G33"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №5 2026-07-06",
+      "referenceSheet": "Лист 5",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G31",
+          "changes": {
+            "value": {
+              "reference": 340676.85000000003,
+              "generated": 340676.85
+            }
+          }
+        },
+        {
+          "cell": "B35",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 15, на сумму 340 676,85 руб.",
+              "generated": "Всего оказано услуг 15, на сумму 340 676,85 руб."
+            }
+          }
+        },
+        {
+          "cell": "C43",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F43",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 59,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I48"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 59,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I48"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F47:G47",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F33:G33",
+          "B35:E35",
+          "B36:H37",
+          "B38:F40",
+          "F43:G43"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F33:G33",
+          "B35:E35",
+          "B36:H37",
+          "B38:F40",
+          "F43:G43",
+          "F47:G47"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №6 2026-07-07",
+      "referenceSheet": "Лист 6",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G27",
+          "changes": {
+            "value": {
+              "reference": 242922.06119999997,
+              "generated": 242922.06
+            }
+          }
+        },
+        {
+          "cell": "B31",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 11, на сумму 242 922,06 руб.",
+              "generated": "Всего оказано услуг 11, на сумму 242 922,06 руб."
+            }
+          }
+        },
+        {
+          "cell": "C39",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F39",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I44"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I44"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F43:G43",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F29:G29",
+          "B31:E31",
+          "B32:H33",
+          "B34:F36",
+          "F39:G39"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F29:G29",
+          "B31:E31",
+          "B32:H33",
+          "B34:F36",
+          "F39:G39",
+          "F43:G43"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №7 2026-07-08",
+      "referenceSheet": "Лист 7",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G24",
+          "changes": {
+            "value": {
+              "reference": 243559.5755,
+              "generated": 243559.58
+            }
+          }
+        },
+        {
+          "cell": "B28",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 8, на сумму 243 559,58 руб.",
+              "generated": "Всего оказано услуг 8, на сумму 243 559,58 руб."
+            }
+          }
+        },
+        {
+          "cell": "C36",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F36",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F40:G40",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36",
+          "F40:G40"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №8 2026-07-09",
+      "referenceSheet": "Лист 8",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G23",
+          "changes": {
+            "value": {
+              "reference": 198496.64249999996,
+              "generated": 198496.64
+            }
+          }
+        },
+        {
+          "cell": "B27",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 7, на сумму 198 496,64 руб.",
+              "generated": "Всего оказано услуг 7, на сумму 198 496,64 руб."
+            }
+          }
+        },
+        {
+          "cell": "C35",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F35",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F39:G39",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35",
+          "F39:G39"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №9 2026-07-10",
+      "referenceSheet": "Лист 9",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G21",
+          "changes": {
+            "value": {
+              "reference": 183301.36045,
+              "generated": 183301.36
+            }
+          }
+        },
+        {
+          "cell": "B25",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 5, на сумму 183 301,36 руб.",
+              "generated": "Всего оказано услуг 5, на сумму 183 301,36 руб."
+            }
+          }
+        },
+        {
+          "cell": "C33",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F33",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I38"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I38"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F37:G37",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F23:G23",
+          "B25:E25",
+          "B26:H27",
+          "B28:F30",
+          "F33:G33"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F23:G23",
+          "B25:E25",
+          "B26:H27",
+          "B28:F30",
+          "F33:G33",
+          "F37:G37"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №10 2026-07-13",
+      "referenceSheet": "Лист 10",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G30",
+          "changes": {
+            "value": {
+              "reference": 368723.96365,
+              "generated": 368723.96
+            }
+          }
+        },
+        {
+          "cell": "B34",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 14, на сумму 368 723,96 руб.",
+              "generated": "Всего оказано услуг 14, на сумму 368 723,96 руб."
+            }
+          }
+        },
+        {
+          "cell": "C42",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F42",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 63,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 63,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F46:G46",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42",
+          "F46:G46"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №11 2026-07-14",
+      "referenceSheet": "Лист 11",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G25",
+          "changes": {
+            "value": {
+              "reference": 203204.20470000003,
+              "generated": 203204.2
+            }
+          }
+        },
+        {
+          "cell": "B29",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 9, на сумму 203 204,20 руб.",
+              "generated": "Всего оказано услуг 9, на сумму 203 204,20 руб."
+            }
+          }
+        },
+        {
+          "cell": "C37",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F37",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I42"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I42"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F41:G41",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F27:G27",
+          "B29:E29",
+          "B30:H31",
+          "B32:F34",
+          "F37:G37"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F27:G27",
+          "B29:E29",
+          "B30:H31",
+          "B32:F34",
+          "F37:G37",
+          "F41:G41"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №12 2026-07-15",
+      "referenceSheet": "Лист 12",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G24",
+          "changes": {
+            "value": {
+              "reference": 191378.68129999997,
+              "generated": 191378.68
+            }
+          }
+        },
+        {
+          "cell": "B28",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 8, на сумму 191 378,68 руб.",
+              "generated": "Всего оказано услуг 8, на сумму 191 378,68 руб."
+            }
+          }
+        },
+        {
+          "cell": "C36",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F36",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F40:G40",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36",
+          "F40:G40"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №13 2026-07-16",
+      "referenceSheet": "Лист 13",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G22",
+          "changes": {
+            "value": {
+              "reference": 186058.54559999998,
+              "generated": 186058.55
+            }
+          }
+        },
+        {
+          "cell": "B26",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 6, на сумму 186 058,55 руб.",
+              "generated": "Всего оказано услуг 6, на сумму 186 058,55 руб."
+            }
+          }
+        },
+        {
+          "cell": "C34",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F38:G38",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34",
+          "F38:G38"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №14 2026-07-17",
+      "referenceSheet": "Лист 14",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G22",
+          "changes": {
+            "value": {
+              "reference": 191559.57154999996,
+              "generated": 191559.57
+            }
+          }
+        },
+        {
+          "cell": "B26",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 6, на сумму  191 559,57 руб.",
+              "generated": "Всего оказано услуг 6, на сумму 191 559,57 руб."
+            }
+          }
+        },
+        {
+          "cell": "C34",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F38:G38",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34",
+          "F38:G38"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №15 2026-07-20",
+      "referenceSheet": "Лист 15",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G30",
+          "changes": {
+            "value": {
+              "reference": 334244.84445000003,
+              "generated": 334244.84
+            }
+          }
+        },
+        {
+          "cell": "B34",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 14, на сумму 334 244,84 руб.",
+              "generated": "Всего оказано услуг 14, на сумму 334 244,84 руб."
+            }
+          }
+        },
+        {
+          "cell": "C42",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F42",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 62,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 62,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F46:G46",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42",
+          "F46:G46"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №16 2026-07-21",
+      "referenceSheet": "Лист 16",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G24",
+          "changes": {
+            "value": {
+              "reference": 277169.56649000006,
+              "generated": 277169.57
+            }
+          }
+        },
+        {
+          "cell": "B28",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 8, на сумму 277 169,57 руб.",
+              "generated": "Всего оказано услуг 8, на сумму 277 169,57 руб."
+            }
+          }
+        },
+        {
+          "cell": "C36",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F36",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I41"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F40:G40",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F26:G26",
+          "B28:E28",
+          "B29:H30",
+          "B31:F33",
+          "F36:G36",
+          "F40:G40"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №17 2026-07-22",
+      "referenceSheet": "Лист 17",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G23",
+          "changes": {
+            "value": {
+              "reference": 244490.4893,
+              "generated": 244490.49
+            }
+          }
+        },
+        {
+          "cell": "B27",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 7, на сумму 244 490,49 руб.",
+              "generated": "Всего оказано услуг 7, на сумму 244 490,49 руб."
+            }
+          }
+        },
+        {
+          "cell": "C35",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F35",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F39:G39",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35",
+          "F39:G39"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №18 2026-07-23",
+      "referenceSheet": "Лист 18",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G23",
+          "changes": {
+            "value": {
+              "reference": 212004.41400000002,
+              "generated": 212004.41
+            }
+          }
+        },
+        {
+          "cell": "B27",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 7, на сумму 212 004,41 руб.",
+              "generated": "Всего оказано услуг 7, на сумму 212 004,41 руб."
+            }
+          }
+        },
+        {
+          "cell": "C35",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F35",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I40"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F39:G39",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F25:G25",
+          "B27:E27",
+          "B28:H29",
+          "B30:F32",
+          "F35:G35",
+          "F39:G39"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №19 2026-07-24",
+      "referenceSheet": "Лист 19",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G26",
+          "changes": {
+            "value": {
+              "reference": 244994.54320000004,
+              "generated": 244994.54
+            }
+          }
+        },
+        {
+          "cell": "B30",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 10, на сумму 244 994,54 руб.",
+              "generated": "Всего оказано услуг 10, на сумму 244 994,54 руб."
+            }
+          }
+        },
+        {
+          "cell": "C38",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F38",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I43"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I43"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F42:G42",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F28:G28",
+          "B30:E30",
+          "B31:H32",
+          "B33:F35",
+          "F38:G38"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F28:G28",
+          "B30:E30",
+          "B31:H32",
+          "B33:F35",
+          "F38:G38",
+          "F42:G42"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №20 2026-07-27",
+      "referenceSheet": "Лист 20",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G30",
+          "changes": {
+            "value": {
+              "reference": 309101.4234,
+              "generated": 309101.42
+            }
+          }
+        },
+        {
+          "cell": "B34",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 14, на сумму 309 101,42 руб.",
+              "generated": "Всего оказано услуг 14, на сумму 309 101,42 руб."
+            }
+          }
+        },
+        {
+          "cell": "C42",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F42",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 62,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 62,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I47"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F46:G46",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F32:G32",
+          "B34:E34",
+          "B35:H36",
+          "B37:F39",
+          "F42:G42",
+          "F46:G46"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №21 2026-07-28",
+      "referenceSheet": "Лист 21",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G27",
+          "changes": {
+            "value": {
+              "reference": 327791.0399,
+              "generated": 327791.04
+            }
+          }
+        },
+        {
+          "cell": "B31",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 11, на сумму 327 791,04 руб.",
+              "generated": "Всего оказано услуг 11, на сумму 327 791,04 руб."
+            }
+          }
+        },
+        {
+          "cell": "C39",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F39",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I44"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I44"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F43:G43",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F29:G29",
+          "B31:E31",
+          "B32:H33",
+          "B34:F36",
+          "F39:G39"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F29:G29",
+          "B31:E31",
+          "B32:H33",
+          "B34:F36",
+          "F39:G39",
+          "F43:G43"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №22 2026-07-29",
+      "referenceSheet": "Лист 22",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G22",
+          "changes": {
+            "value": {
+              "reference": 323863.07392,
+              "generated": 323863.07
+            }
+          }
+        },
+        {
+          "cell": "B26",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 6, на сумму 323 863,07 руб.",
+              "generated": "Всего оказано услуг 6, на сумму 323 863,07 руб."
+            }
+          }
+        },
+        {
+          "cell": "C34",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I39"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F38:G38",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F24:G24",
+          "B26:E26",
+          "B27:H28",
+          "B29:F31",
+          "F34:G34",
+          "F38:G38"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №23 2026-07-30",
+      "referenceSheet": "Лист 23",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G19",
+          "changes": {
+            "value": {
+              "reference": 143449.5072,
+              "generated": 143449.51
+            }
+          }
+        },
+        {
+          "cell": "B23",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 3, на сумму 143 449,51 руб.",
+              "generated": "Всего оказано услуг 3, на сумму 143 449,51 руб."
+            }
+          }
+        },
+        {
+          "cell": "C31",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F31",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I36"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I36"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F35:G35",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F21:G21",
+          "B23:E23",
+          "B24:H25",
+          "B26:F28",
+          "F31:G31"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F21:G21",
+          "B23:E23",
+          "B24:H25",
+          "B26:F28",
+          "F31:G31",
+          "F35:G35"
+        ]
+      }
+    },
+    {
+      "sheet": "Акт №24 2026-07-31",
+      "referenceSheet": "Лист 24",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C3",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "G18",
+          "changes": {
+            "value": {
+              "reference": 46662.31999999999,
+              "generated": 46662.32
+            }
+          }
+        },
+        {
+          "cell": "B22",
+          "changes": {
+            "value": {
+              "reference": "Всего оказано услуг 2, на сумму 143 449,51 руб.",
+              "generated": "Всего оказано услуг 2, на сумму 46 662,32 руб."
+            }
+          }
+        },
+        {
+          "cell": "B23",
+          "changes": {
+            "value": {
+              "reference": "Сто сорок три тысячи четыреста сорок девять руб. 51 коп.",
+              "generated": "Сорок шесть тысяч шестьсот шестьдесят два руб. 32 коп."
+            }
+          }
+        },
+        {
+          "cell": "C30",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А.Б.",
+              "generated": "ИП Царюк А. Б."
+            }
+          }
+        },
+        {
+          "cell": "F30",
+          "changes": {
+            "value": {
+              "reference": "ООО\"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I35"
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 70,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 2,
+          "printArea": "A1:I35"
+        }
+      },
+      "merges": {
+        "reference": [
+          "F34:G34",
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F20:G20",
+          "B22:E22",
+          "B23:H24",
+          "B25:F27",
+          "F30:G30"
+        ],
+        "generated": [
+          "A1:H1",
+          "A3:B3",
+          "C3:I5",
+          "A7:B7",
+          "C7:I10",
+          "A12:B12",
+          "C12:I12",
+          "F20:G20",
+          "B22:E22",
+          "B23:H24",
+          "B25:F27",
+          "F30:G30",
+          "F34:G34"
+        ]
+      }
+    }
+  ],
+  "final": [
+    {
+      "sheet": "Акт",
+      "referenceSheet": "39 копеек",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "C5",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, тел.: +7(978)7590213,  р/с 40802810300810046245, в банке  БАНК ВТБ (ПАО), БИК 044525411, к/с 30101810145250000411",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2, р/с 40802810300810046245, в банке Банк ВТБ (ПАО), Филиал \"Центральный\", БИК 044525411, к/с 30101810145250000411"
+            }
+          }
+        },
+        {
+          "cell": "H13",
+          "changes": {
+            "value": {
+              "reference": 2042594.4611,
+              "generated": 2042594.46
+            }
+          }
+        },
+        {
+          "cell": "H14",
+          "changes": {
+            "value": {
+              "reference": 1002721.86496,
+              "generated": 1002721.86
+            }
+          }
+        },
+        {
+          "cell": "H17",
+          "changes": {
+            "value": {
+              "reference": null,
+              "generated": 5554372.39
+            }
+          }
+        },
+        {
+          "cell": "F25",
+          "changes": {
+            "value": {
+              "reference": "ООО \"РБЕ\"",
+              "generated": "ООО «РБЕ»"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": false,
+          "margins": {
+            "left": 0.984251968503937,
+            "right": 0.393700787401575,
+            "top": 0.393700787401575,
+            "bottom": 0.984251968503937,
+            "header": 0.511811023622047,
+            "footer": 0.511811023622047
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 76,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1,
+          "printArea": "A1:H29"
+        },
+        "generated": {
+          "fitToPage": false,
+          "margins": {
+            "left": 0.984251968503937,
+            "right": 0.393700787401575,
+            "top": 0.393700787401575,
+            "bottom": 0.984251968503937,
+            "header": 0.511811023622047,
+            "footer": 0.511811023622047
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 76,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1,
+          "printArea": "A1:H29"
+        }
+      },
+      "merges": {
+        "reference": [
+          "A27:D27",
+          "A8:B9",
+          "C8:H9",
+          "A2:F3",
+          "A6:B7",
+          "C6:H7",
+          "A22:H22",
+          "A23:H23",
+          "A24:C24",
+          "F24:H24",
+          "A25:C25",
+          "F25:G25",
+          "B12:D12",
+          "B13:D13",
+          "B14:D14",
+          "F18:G18",
+          "A19:C19",
+          "A1:F1",
+          "A4:F4",
+          "A5:B5",
+          "C5:H5",
+          "B11:D11"
+        ],
+        "generated": [
+          "A1:F1",
+          "A2:F3",
+          "A4:F4",
+          "A5:B5",
+          "C5:H5",
+          "A6:B7",
+          "C6:H7",
+          "A8:B9",
+          "C8:H9",
+          "B11:D11",
+          "B12:D12",
+          "B13:D13",
+          "B14:D14",
+          "F18:G18",
+          "A19:C19",
+          "A22:H22",
+          "A23:H23",
+          "A24:C24",
+          "F24:H24",
+          "A25:C25",
+          "F25:G25",
+          "A27:D27"
+        ]
+      }
+    }
+  ],
+  "registry": [
+    {
+      "sheet": "Реестр",
+      "referenceSheet": "Лист1",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "A1",
+          "changes": {
+            "value": {
+              "reference": "                                                                  РЕЕСТР ДОКУМЕНТОВ: 1-31 июля 2026 года\n            Наименование контрагента: Индивидуальный предприниматель Царюк Алексей Борисович\n            ИНН контрагента: 920451405776\n            Договор на поставку товара/оказание услуг: Договор №ВПЛРБЕФЮ-1ЦАБ на оказание услуг по перевозке груза от 1 апреля 2026 года\n            Наименование товара/услуг: транспортные услуги с 1.07.2026 по 31.07.2026\n           Реестр документов реализации товаров/услуг за период с 1.07.2026 по 31.07.2026\n           По договору № ВПЛРБЕФЮ-1ЦАБ от 01.04.2026 года заключённому между ИП Царюк А.Б. и ООО «РБЕ»\n           Счёт на оплату №7 от 31 июля 2026 года  ИГК-1770425226125Z000051",
+              "generated": "                                                                  РЕЕСТР ДОКУМЕНТОВ: 1-31 июля 2026 года\n            Наименование контрагента: Индивидуальный предприниматель Царюк Алексей Борисович\n            ИНН контрагента: 920451405776\n            Договор на поставку товара/оказание услуг: Договор №ВПЛРБЕФЮ-1ЦАБ на оказание услуг по перевозке груза от 1 апреля 2026 года\n            Наименование товара/услуг: транспортные услуги с 1.07.2026 по 31.07.2026\n           Реестр документов реализации товаров/услуг за период с 1.07.2026 по 31.07.2026\n           По договору № ВПЛРБЕФЮ-1ЦАБ от 01.04.2026 года заключённому между ИП Царюк А. Б. и ООО «РБЕ»\n           Счёт на оплату №7 от 31 июля 2026 года  ИГК-1770425226125Z000051"
+            }
+          }
+        },
+        {
+          "cell": "F14",
+          "changes": {
+            "value": {
+              "reference": 208385.4775,
+              "generated": 208385.48
+            }
+          }
+        },
+        {
+          "cell": "F15",
+          "changes": {
+            "value": {
+              "reference": 194090.26085,
+              "generated": 194090.26
+            }
+          }
+        },
+        {
+          "cell": "F16",
+          "changes": {
+            "value": {
+              "reference": 190451.7526,
+              "generated": 190451.75
+            }
+          }
+        },
+        {
+          "cell": "F17",
+          "changes": {
+            "value": {
+              "reference": 27838.448,
+              "generated": 27838.45
+            }
+          }
+        },
+        {
+          "cell": "F19",
+          "changes": {
+            "value": {
+              "reference": 242922.0612,
+              "generated": 242922.06
+            }
+          }
+        },
+        {
+          "cell": "F20",
+          "changes": {
+            "value": {
+              "reference": 243559.5755,
+              "generated": 243559.58
+            }
+          }
+        },
+        {
+          "cell": "F21",
+          "changes": {
+            "value": {
+              "reference": 198496.6425,
+              "generated": 198496.64
+            }
+          }
+        },
+        {
+          "cell": "F22",
+          "changes": {
+            "value": {
+              "reference": 183301.36045,
+              "generated": 183301.36
+            }
+          }
+        },
+        {
+          "cell": "F23",
+          "changes": {
+            "value": {
+              "reference": 368723.96365,
+              "generated": 368723.96
+            }
+          }
+        },
+        {
+          "cell": "F24",
+          "changes": {
+            "value": {
+              "reference": 203204.20470000003,
+              "generated": 203204.2
+            }
+          }
+        },
+        {
+          "cell": "F25",
+          "changes": {
+            "value": {
+              "reference": 191378.68129999997,
+              "generated": 191378.68
+            }
+          }
+        },
+        {
+          "cell": "F26",
+          "changes": {
+            "value": {
+              "reference": 186058.54559999998,
+              "generated": 186058.55
+            }
+          }
+        },
+        {
+          "cell": "F27",
+          "changes": {
+            "value": {
+              "reference": 191559.57154999996,
+              "generated": 191559.57
+            }
+          }
+        },
+        {
+          "cell": "F28",
+          "changes": {
+            "value": {
+              "reference": 334244.84445000003,
+              "generated": 334244.84
+            }
+          }
+        },
+        {
+          "cell": "F29",
+          "changes": {
+            "value": {
+              "reference": 277169.56649000006,
+              "generated": 277169.57
+            }
+          }
+        },
+        {
+          "cell": "F30",
+          "changes": {
+            "value": {
+              "reference": 244490.4893,
+              "generated": 244490.49
+            }
+          }
+        },
+        {
+          "cell": "F31",
+          "changes": {
+            "value": {
+              "reference": 212004.414,
+              "generated": 212004.41
+            }
+          }
+        },
+        {
+          "cell": "F32",
+          "changes": {
+            "value": {
+              "reference": 244994.5432,
+              "generated": 244994.54
+            }
+          }
+        },
+        {
+          "cell": "F33",
+          "changes": {
+            "value": {
+              "reference": 309101.4234,
+              "generated": 309101.42
+            }
+          }
+        },
+        {
+          "cell": "F34",
+          "changes": {
+            "value": {
+              "reference": 327791.0399,
+              "generated": 327791.04
+            }
+          }
+        },
+        {
+          "cell": "F35",
+          "changes": {
+            "value": {
+              "reference": 323863.07392,
+              "generated": 323863.07
+            }
+          }
+        },
+        {
+          "cell": "F36",
+          "changes": {
+            "value": {
+              "reference": 143449.5072,
+              "generated": 143449.51
+            }
+          }
+        },
+        {
+          "cell": "F37",
+          "changes": {
+            "value": {
+              "reference": 166616.108,
+              "generated": 46662.32
+            }
+          }
+        },
+        {
+          "cell": "G37",
+          "changes": {
+            "value": {
+              "reference": 166616.11,
+              "generated": 46662.32
+            }
+          }
+        },
+        {
+          "cell": "C38",
+          "changes": {
+            "value": {
+              "reference": 5554372.40526,
+              "generated": 5434418.6
+            }
+          }
+        },
+        {
+          "cell": "G38",
+          "changes": {
+            "value": {
+              "reference": 5554372.39,
+              "generated": 5434418.6
+            }
+          }
+        },
+        {
+          "cell": "B43",
+          "changes": {
+            "value": {
+              "reference": "Индивидуальный предприниматель: Царюк А.Б. ____________________",
+              "generated": "Индивидуальный предприниматель: Царюк А. Б. ____________________"
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.25,
+            "right": 0.25,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 52,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1
+        },
+        "generated": {
+          "fitToPage": true,
+          "margins": {
+            "left": 0.25,
+            "right": 0.25,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 52,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1
+        }
+      },
+      "merges": {
+        "reference": [
+          "A1:J11",
+          "C38:F38",
+          "B43:F43"
+        ],
+        "generated": [
+          "A1:J11",
+          "C38:F38",
+          "B43:F43"
+        ]
+      }
+    }
+  ],
+  "invoice": [
+    {
+      "sheet": "Счёт",
+      "referenceSheet": "39 коп",
+      "columns": [],
+      "rows": [],
+      "cells": [
+        {
+          "cell": "A1",
+          "changes": {
+            "value": {
+              "reference": "Банк Филиал \"Центральный\" Банка ВТБ (ПАО)",
+              "generated": "Банк ВТБ (ПАО), Филиал \"Центральный\""
+            }
+          }
+        },
+        {
+          "cell": "C13",
+          "changes": {
+            "value": {
+              "reference": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом      № 93, квартира 2",
+              "generated": "ИП Царюк А. Б., ИНН 920451405776, 299040, Севастополь г, Хрусталева ул, дом № 93, квартира 2"
+            }
+          }
+        },
+        {
+          "cell": "E21",
+          "changes": {
+            "value": {
+              "reference": 506880.01599999995,
+              "generated": 506880.016
+            }
+          }
+        },
+        {
+          "cell": "E22",
+          "changes": {
+            "value": {
+              "reference": 334851.5510000001,
+              "generated": 334851.551
+            }
+          }
+        },
+        {
+          "cell": "H22",
+          "changes": {
+            "value": {
+              "reference": 2042594.4611000004,
+              "generated": 2042594.46
+            }
+          }
+        },
+        {
+          "cell": "E23",
+          "changes": {
+            "value": {
+              "reference": 102737.89600000002,
+              "generated": 102737.896
+            }
+          }
+        },
+        {
+          "cell": "H23",
+          "changes": {
+            "value": {
+              "reference": 1002721.8649600002,
+              "generated": 1002721.86
+            }
+          }
+        },
+        {
+          "cell": "I36",
+          "changes": {
+            "value": {
+              "reference": "Царюк А.Б.",
+              "generated": "Царюк А. Б."
+            }
+          }
+        }
+      ],
+      "print": {
+        "reference": {
+          "fitToPage": false,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 82,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1,
+          "printArea": "A1:H42"
+        },
+        "generated": {
+          "fitToPage": false,
+          "margins": {
+            "left": 0.7,
+            "right": 0.7,
+            "top": 0.75,
+            "bottom": 0.75,
+            "header": 0.3,
+            "footer": 0.3
+          },
+          "paperSize": 9,
+          "orientation": "portrait",
+          "horizontalDpi": 4294967295,
+          "verticalDpi": 4294967295,
+          "pageOrder": "downThenOver",
+          "blackAndWhite": false,
+          "draft": false,
+          "cellComments": "None",
+          "errors": "displayed",
+          "scale": 82,
+          "fitToWidth": 1,
+          "fitToHeight": 1,
+          "firstPageNumber": 1,
+          "useFirstPageNumber": false,
+          "usePrinterDefaults": false,
+          "copies": 1,
+          "printArea": "A1:H42"
+        }
+      },
+      "merges": {
+        "reference": [
+          "C4:D4",
+          "E4:E7",
+          "F4:H7",
+          "A5:D6",
+          "A7:D7",
+          "A1:D1",
+          "F1:H1",
+          "A2:D3",
+          "E2:E3",
+          "F2:H3",
+          "B23:D23",
+          "A8:F8",
+          "A9:F10",
+          "A11:F11",
+          "A13:B13",
+          "C13:H13",
+          "A14:B15",
+          "C14:H15",
+          "A17:B17",
+          "C17:H18",
+          "B20:D20",
+          "B21:D21",
+          "B22:D22",
+          "A36:B36",
+          "A28:C28",
+          "A31:H31",
+          "A32:H32",
+          "A33:H33",
+          "A34:H34",
+          "A35:H35"
+        ],
+        "generated": [
+          "A1:D1",
+          "F1:H1",
+          "A2:D3",
+          "F2:H3",
+          "E2:E3",
+          "C4:D4",
+          "F4:H7",
+          "A5:D6",
+          "E4:E7",
+          "A7:D7",
+          "A8:F8",
+          "A9:F10",
+          "A11:F11",
+          "A13:B13",
+          "C13:H13",
+          "A14:B15",
+          "C14:H15",
+          "A17:B17",
+          "C17:H18",
+          "B20:D20",
+          "B21:D21",
+          "B22:D22",
+          "B23:D23",
+          "A28:C28",
+          "A31:H31",
+          "A32:H32",
+          "A33:H33",
+          "A34:H34",
+          "A35:H35",
+          "A36:B36"
+        ]
+      }
+    }
+  ]
+}
