@@ -78,6 +78,19 @@ function setPrintSetup(ws: ExcelJS.Worksheet, printArea: string) {
   };
 }
 
+/** Ячейка без явного имени шрифта наследует в Excel гарнитуру темы
+ * (Calibri у всех примеров), но LibreOffice подставляет свой дефолт с
+ * засечками — из-за этого весь документ визуально "не тот" шрифт. Дозаполняем
+ * имя явно везде, где оно не задано, не трогая осознанные переопределения
+ * (например Arial в шапке таблицы дневного акта). */
+function backfillDefaultFont(ws: ExcelJS.Worksheet, defaultName = "Calibri") {
+  ws.eachRow({ includeEmpty: false }, (row) => {
+    row.eachCell({ includeEmpty: false }, (cell) => {
+      if (!cell.font?.name) cell.font = { ...cell.font, name: defaultName };
+    });
+  });
+}
+
 function colLetterToNumber(letters: string): number {
   let n = 0;
   for (const ch of letters) n = n * 26 + (ch.charCodeAt(0) - 64);
@@ -101,7 +114,10 @@ function borderRange(ws: ExcelJS.Worksheet, range: string) {
   }
 }
 
-function supplierBlockText(supplier: OrgProfile | null): string {
+/** Блок реквизитов "Исполнитель:"/"Поставщик:". Телефон в нём есть только в
+ * итоговом акте — в дневном акте и в счёте (проверено по реальным примерам)
+ * его нет, поэтому `includePhone` по умолчанию выключен. */
+function supplierBlockText(supplier: OrgProfile | null, includePhone = false): string {
   if (!supplier) return "";
   const bank = [supplier.bankAccount && `р/с ${supplier.bankAccount}`, supplier.bankName && `в банке ${supplier.bankName}`, supplier.bik && `БИК ${supplier.bik}`, supplier.corrAccount && `к/с ${supplier.corrAccount}`]
     .filter(Boolean)
@@ -109,7 +125,7 @@ function supplierBlockText(supplier: OrgProfile | null): string {
   return [
     `${supplier.shortName || supplier.name}, ИНН ${supplier.inn}`,
     supplier.legalAddress,
-    supplier.phone && `тел.: ${supplier.phone}`,
+    includePhone && supplier.phone && `тел.: ${supplier.phone}`,
     bank,
   ]
     .filter(Boolean)
@@ -278,6 +294,7 @@ export function addDayActSheet(workbook: ExcelJS.Workbook, dayAct: DayAct, ctx: 
   ws.getCell(`F${lastData + 18}`).font = { size: 11 };
   ws.getCell(`F${lastData + 18}`).alignment = { vertical: "middle" };
 
+  backfillDefaultFont(ws);
   setPrintSetup(ws, `A1:I${lastData + 18}`);
   return ws;
 }
@@ -380,6 +397,7 @@ export function buildRegistryWorkbook(
   ws.mergeCells(`B${lastData + 6}:F${lastData + 6}`);
   ws.getCell(`B${lastData + 6}`).value = `Индивидуальный предприниматель: ${(ctx.supplier?.shortName || ctx.supplier?.name || "").replace(/^ИП\s+/, "")} ____________________`;
 
+  backfillDefaultFont(ws);
   setPrintSetup(ws, `A1:G${lastData + 6}`);
   return workbook;
 }
@@ -410,7 +428,7 @@ export function buildFinalActWorkbook(
   ws.getCell("A5").font = { size: 9 };
   ws.getCell("A5").alignment = { wrapText: true, vertical: "middle" };
   ws.mergeCells("C5:H5");
-  ws.getCell("C5").value = supplierBlockText(ctx.supplier);
+  ws.getCell("C5").value = supplierBlockText(ctx.supplier, true);
   ws.getCell("C5").font = { bold: true, size: 11 };
   ws.getCell("C5").alignment = { wrapText: true, vertical: "middle" };
   ws.getRow(5).height = 47.25;
@@ -523,6 +541,7 @@ export function buildFinalActWorkbook(
     "Вышеперечисленные услуги выполнены полностью и в срок. Заказчик претензий по объему, качеству и срокам оказания услуг не имеет.";
   ws.getCell(`A${lastData + 8}`).font = { size: 10 };
   ws.getCell(`A${lastData + 8}`).alignment = { wrapText: true, vertical: "middle" };
+  for (let c = 1; c <= 8; c++) ws.getRow(lastData + 9).getCell(c).border = { top: { style: "medium" } };
 
   ws.mergeCells(`A${lastData + 10}:C${lastData + 10}`);
   ws.getCell(`A${lastData + 10}`).value = "ИСПОЛНИТЕЛЬ";
@@ -542,12 +561,17 @@ export function buildFinalActWorkbook(
   ws.getCell(`F${lastData + 11}`).font = { size: 11 };
   ws.getCell(`F${lastData + 11}`).alignment = { vertical: "top" };
 
+  // Линии для подписи — под обеими сторонами; подписанное имя проставлено
+  // только у исполнителя (заказчик расписывается сам, поле пустое).
+  for (let c = 1; c <= 4; c++) ws.getRow(lastData + 12).getCell(c).border = { bottom: { style: "thin" } };
+  for (let c = 6; c <= 8; c++) ws.getRow(lastData + 12).getCell(c).border = { bottom: { style: "thin" } };
+
   ws.mergeCells(`A${lastData + 13}:D${lastData + 13}`);
   ws.getCell(`A${lastData + 13}`).value = (ctx.supplier?.shortName || ctx.supplier?.name || "").replace(/^ИП\s+/, "");
   ws.getCell(`A${lastData + 13}`).font = { size: 8 };
   ws.getCell(`A${lastData + 13}`).alignment = { horizontal: "center", vertical: "top" };
-  ws.getCell(`A${lastData + 13}`).border = { top: { style: "thin" } };
 
+  backfillDefaultFont(ws);
   setPrintSetup(ws, `A1:H${lastData + 13}`);
   return workbook;
 }
@@ -611,6 +635,7 @@ export function buildInvoiceWorkbook(
   for (const range of ["A1:D1", "E1:E1", "F1:H1", "A2:D3", "E2:E3", "F2:H3", "A4:A4", "B4:B4", "C4:D4", "E4:E7", "F4:H7", "A5:D6", "A7:D7"]) {
     borderRange(ws, range);
   }
+  ws.getRow(3).height = 5.25;
 
   ws.mergeCells("A9:F10");
   ws.getCell("A9").value = `Счет на оплату №${info.invoiceNumber} от ${formatDateLong(info.invoiceDate)} г.`;
@@ -618,6 +643,7 @@ export function buildInvoiceWorkbook(
   ws.getCell("A9").alignment = { wrapText: true };
   // Линия-разделитель под шапкой (банк + заголовок) — как в оригинале.
   for (let c = 1; c <= 8; c++) ws.getRow(11).getCell(c).border = { bottom: { style: "thin" } };
+  ws.getRow(11).height = 6;
 
   ws.mergeCells("A13:B13");
   ws.getCell("A13").value = "Поставщик                    (Исполнитель):";
@@ -637,6 +663,7 @@ export function buildInvoiceWorkbook(
   ws.getCell("C14").value = buyerBlockText(ctx.buyer);
   ws.getCell("C14").font = { bold: true, size: 9 };
   ws.getCell("C14").alignment = { wrapText: true };
+  ws.getRow(15).height = 26.25;
 
   ws.mergeCells("A17:B17");
   ws.getCell("A17").value = "Основание:";
@@ -645,6 +672,7 @@ export function buildInvoiceWorkbook(
   ws.getCell("C17").value = [contractNumberLine(ctx.supplier), contractIgkLine(ctx.supplier)].filter(Boolean).join(" ");
   ws.getCell("C17").font = { bold: true, size: 9 };
   ws.getCell("C17").alignment = { wrapText: true };
+  ws.getRow(18).height = 11.25;
 
   const headerRow = ws.getRow(20);
   headerRow.getCell(1).value = "№";
@@ -694,6 +722,7 @@ export function buildInvoiceWorkbook(
   ws.getCell(`G${lastData + 2}`).value = "Итого:";
   ws.getCell(`G${lastData + 2}`).font = { bold: true, size: 9 };
   ws.getCell(`G${lastData + 2}`).alignment = { horizontal: "right" };
+  ws.getRow(lastData + 2).height = 41.1;
   ws.getCell(`H${lastData + 2}`).value = total;
   ws.getCell(`H${lastData + 2}`).numFmt = "#,##0.00";
   ws.getCell(`H${lastData + 2}`).font = { bold: true, size: 9 };
@@ -761,6 +790,7 @@ export function buildInvoiceWorkbook(
   ws.getCell(`I${lastData + 13}`).font = { size: 11 };
   ws.getCell(`I${lastData + 13}`).border = { top: { style: "thin" }, bottom: { style: "thin" } };
 
+  backfillDefaultFont(ws);
   setPrintSetup(ws, `A1:I${lastData + 13}`);
   return workbook;
 }

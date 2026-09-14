@@ -120,7 +120,7 @@ function ImportSection() {
         {errors && (
           <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
             <p className="text-sm font-semibold text-red-700 mb-2">
-              Файл не принят — {errors.length} {errors.length === 1 ? "расхождение" : "расхождений"} с тарифами/справочником. Ничего не сохранено.
+              Файл не принят. Найдено ошибок: {errors.length}. Обработка остановлена, ничего не сохранено. Исправьте указанные ошибки и загрузите верный файл повторно.
             </p>
             <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
               {errors.map((e, i) => (

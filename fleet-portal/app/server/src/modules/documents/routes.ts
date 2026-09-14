@@ -194,13 +194,18 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
             rowNumber: r.rowNumber,
             date: r.date.toISOString().slice(0, 10),
             addressText: r.addressText,
-            message: `Дата в строке ${r.rowNumber} (${r.date.toISOString().slice(0, 10)}) вне заявленного периода листа "${sheetName}" — похоже на испорченную дату в исходном файле. Проверьте вводные данные.`,
+            message: `Файл "${sourceFileName}", лист "${sheetName}", строка ${r.rowNumber}: дата ${r.date.toISOString().slice(0, 10)} вне периода ${declaredPeriod.start.toISOString().slice(0, 10)} — ${declaredPeriod.end.toISOString().slice(0, 10)}. Исправьте дату и загрузите верный файл повторно.`,
           }))
       : [];
 
+    if (dateErrors.length > 0) {
+      request.log.warn({ sourceFileName, sheetName, errorCount: dateErrors.length }, "documents_import_rejected");
+      return reply.send({ accepted: false, errors: dateErrors });
+    }
+
     const [addresses, rates] = await Promise.all([fastify.prisma.address.findMany(), fastify.prisma.addressRate.findMany()]);
     const result = validateRows(rows, addresses, rates);
-    const allErrors = [...dateErrors, ...result.errors];
+    const allErrors = result.errors;
     if (allErrors.length > 0) {
       // Отклонённый импорт — ожидаемый бизнес-исход (плохие вводные), не
       // сбой сервера, но след в логе нужен: потом вместе с пользователем
