@@ -6,6 +6,7 @@ import { listSheetNames, parseSheet, ImportParseError, inferPeriodFromSheetName 
 import { validateRows } from "./validate.js";
 import { buildDayActs, buildMonthSummary, buildRouteSummary, getMonthDeliveries } from "./queries.js";
 import { buildDayActWorkbook, buildFinalActWorkbook, buildInvoiceWorkbook, buildMonthActsWorkbook, buildRegistryWorkbook, type OrgContext } from "./xlsx.js";
+import { writeDocumentWorkbook } from "./layout.js";
 
 const addressSchema = z.object({
   code: z.string().max(20).optional(),
@@ -329,7 +330,7 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
 
   // ---------- Скачивание .xlsx (генерируются на лету, ничего не хранится) ----------
   async function sendWorkbook(reply: import("fastify").FastifyReply, workbook: import("exceljs").Workbook, filename: string) {
-    const buffer = await workbook.xlsx.writeBuffer();
+    const buffer = await writeDocumentWorkbook(workbook);
     reply
       .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       .header("Content-Disposition", `attachment; filename="${encodeURIComponent(filename)}"`)
