@@ -487,7 +487,7 @@ function RoyaltiesConfig({ onChanged }: { onChanged: () => void }) {
   }
 
   return (
-    <Card title="Настройка роялти">
+    <Card title="Настройка роялти" collapsible defaultOpen={false}>
       <p className="text-sm text-slate-500 mb-3">
         Каждое роялти — начисление одному получателю, может состоять из нескольких условий (свой процент от суммы доставок
         своего набора машин), итог по роялти — сумма его условий. Одна и та же машина может входить в условия разных
@@ -555,10 +555,12 @@ function RoyaltyCard({ royalty }: { royalty: RoyaltyResult }) {
     <div className="p-3 rounded-lg border border-slate-200 mb-3">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
         <span className="font-semibold text-slate-800">{royalty.name}</span>
-        <span className="text-sm font-semibold">{fmtMoney(royalty.totalAmount)} ₽</span>
+        <span className="text-base font-bold text-sky-800 px-3 py-1 rounded-lg border-2 border-sky-300 bg-sky-50">
+          {fmtMoney(royalty.totalAmount)} ₽
+        </span>
       </div>
       {royalty.conditions.length === 0 && (
-        <p className="text-xs text-slate-400">У роялти пока нет условий — настройте в разделе «Настройка роялти» выше.</p>
+        <p className="text-xs text-slate-400">У роялти пока нет условий — настройте в разделе «Настройка роялти» ниже.</p>
       )}
       {royalty.conditions.map((c) => (
         <RoyaltyConditionCard key={c.conditionId} condition={c} />
@@ -605,8 +607,8 @@ function RoyaltiesSection() {
   const [refreshKey, setRefreshKey] = useState(0);
   return (
     <div>
-      <RoyaltiesConfig onChanged={() => setRefreshKey((k) => k + 1)} />
       <RoyaltiesMonthSection refreshKey={refreshKey} />
+      <RoyaltiesConfig onChanged={() => setRefreshKey((k) => k + 1)} />
     </div>
   );
 }
