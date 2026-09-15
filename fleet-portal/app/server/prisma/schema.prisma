@@ -243,6 +243,13 @@ model ImportBatch {
   totalCost      Float
   createdBy      Int
   createdAt      DateTime   @default(now())
+  // Меняется на "Заменить файл" — совпадает с createdAt, пока импорт ни разу
+  // не заменяли. Показываем в UI только когда отличается от createdAt.
+  updatedAt      DateTime   @updatedAt
+  // Сам присланный .xlsx — чтобы можно было скачать и посмотреть, какой
+  // именно файл сейчас лежит в основе рейсов за этот период. У импортов,
+  // сделанных до этого поля, будет null — на UI для них кнопки скачивания нет.
+  fileData       Bytes?
   deliveries     Delivery[]
 
   @@index([periodFrom, periodTo])

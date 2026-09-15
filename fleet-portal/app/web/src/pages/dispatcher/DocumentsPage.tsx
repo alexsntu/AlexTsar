@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { Fragment, useState, type FormEvent } from "react";
 import { api } from "../../api/client";
 import { describeError } from "../../api/errors";
 import { useApi } from "../../hooks/useApi";
@@ -22,8 +22,11 @@ function currentYearMonth(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function ImportSection() {
-  const { data: batches, reload } = useApi<ImportBatch[]>("/api/documents/imports");
+/** Форма загрузки файла — используется и для первой загрузки нового периода
+ * (endpoint = "/api/documents/imports"), и для замены файла уже
+ * существующего импорта (endpoint = ".../imports/:id/replace"): выбор
+ * листа, ошибки валидации и итоговое сообщение показываются одинаково. */
+function ImportUploadForm({ endpoint, onUploaded }: { endpoint: string; onUploaded: (batch: ImportBatch) => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [sheets, setSheets] = useState<string[] | null>(null);
   const [selectedSheet, setSelectedSheet] = useState("");
@@ -42,7 +45,7 @@ function ImportSection() {
       const formData = new FormData();
       formData.append("file", file);
       if (sheetName) formData.append("sheetName", sheetName);
-      const result = await api.postForm<ImportResult>("/api/documents/imports", formData);
+      const result = await api.postForm<ImportResult>(endpoint, formData);
       if ("needsSheetSelection" in result) {
         setSheets(result.sheets);
         setSelectedSheet(result.suggested);
@@ -55,7 +58,7 @@ function ImportSection() {
       }
       setSuccess(result.batch);
       setFile(null);
-      await reload();
+      onUploaded(result.batch);
     } catch (err) {
       setError(describeError(err));
     } finally {
@@ -68,93 +71,146 @@ function ImportSection() {
     await upload();
   }
 
+  return (
+    <div>
+      <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-3 flex-wrap">
+        <div className="w-80">
+          <Field label="Файл .xlsx">
+            <input
+              type="file"
+              accept=".xlsx"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-sky-50 file:text-sky-700 file:text-sm hover:file:bg-sky-100"
+            />
+          </Field>
+        </div>
+        <Button type="submit" disabled={!file || submitting}>
+          {submitting ? "Проверяем…" : "Проверить и загрузить"}
+        </Button>
+      </form>
+
+      {sheets && (
+        <div className="mb-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
+          <p className="text-sm text-amber-800 mb-2">
+            В файле несколько похожих листов — выберите, какой из них содержит рейсы за этот период:
+          </p>
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="w-64">
+              <Select value={selectedSheet} onChange={(e) => setSelectedSheet(e.target.value)}>
+                {sheets.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <Button type="button" onClick={() => void upload(selectedSheet)} disabled={submitting}>
+              Загрузить этот лист
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <ErrorText>{error}</ErrorText>
+
+      {errors && (
+        <div className="mb-3 p-3 rounded-lg bg-red-50 border border-red-200">
+          <p className="text-sm font-semibold text-red-700 mb-2">
+            Файл не принят. Найдено ошибок: {errors.length}. Обработка остановлена, ничего не сохранено. Исправьте указанные ошибки и загрузите верный файл повторно.
+          </p>
+          <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+            {errors.map((e, i) => (
+              <li key={i}>{e.message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-800">
+          Загружено: {success.rowCount} рейсов, {fmt(success.totalMassKg)} кг, на сумму {fmtMoney(success.totalCost)} ₽ (период{" "}
+          {formatShortDate(success.periodFrom)} — {formatShortDate(success.periodTo)}).
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ImportSection() {
+  const { data: batches, reload } = useApi<ImportBatch[]>("/api/documents/imports");
+  const [replacingId, setReplacingId] = useState<number | null>(null);
+
   async function deleteBatch(id: number) {
     if (!window.confirm("Удалить этот импорт и все связанные с ним рейсы? Это необратимо.")) return;
     await api.delete(`/api/documents/imports/${id}`);
     await reload();
   }
 
+  async function downloadOriginal(b: ImportBatch) {
+    try {
+      await api.downloadFile(`/api/documents/imports/${b.id}/download`, b.sourceFileName);
+    } catch (err) {
+      window.alert(describeError(err));
+    }
+  }
+
   return (
     <div>
       <Card title="Загрузка расшифровки от заказчика">
-        <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
-          <div className="w-80">
-            <Field label="Файл .xlsx">
-              <input
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-sky-50 file:text-sky-700 file:text-sm hover:file:bg-sky-100"
-              />
-            </Field>
-          </div>
-          <Button type="submit" disabled={!file || submitting}>
-            {submitting ? "Проверяем…" : "Проверить и загрузить"}
-          </Button>
-        </form>
-
-        {sheets && (
-          <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-            <p className="text-sm text-amber-800 mb-2">
-              В файле несколько похожих листов — выберите, какой из них содержит рейсы за этот период:
-            </p>
-            <div className="flex gap-2 items-end flex-wrap">
-              <div className="w-64">
-                <Select value={selectedSheet} onChange={(e) => setSelectedSheet(e.target.value)}>
-                  {sheets.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <Button type="button" onClick={() => void upload(selectedSheet)} disabled={submitting}>
-                Загрузить этот лист
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <ErrorText>{error}</ErrorText>
-
-        {errors && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-sm font-semibold text-red-700 mb-2">
-              Файл не принят. Найдено ошибок: {errors.length}. Обработка остановлена, ничего не сохранено. Исправьте указанные ошибки и загрузите верный файл повторно.
-            </p>
-            <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
-              {errors.map((e, i) => (
-                <li key={i}>{e.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-800">
-            Загружено: {success.rowCount} рейсов, {fmt(success.totalMassKg)} кг, на сумму {fmtMoney(success.totalCost)} ₽ (период{" "}
-            {formatShortDate(success.periodFrom)} — {formatShortDate(success.periodTo)}).
-          </div>
-        )}
+        <ImportUploadForm endpoint="/api/documents/imports" onUploaded={() => void reload()} />
       </Card>
 
       <Card title="Загруженные периоды">
-        <Table head={["Период", "Файл", "Рейсов", "Масса, кг", "Сумма, ₽", ""]}>
+        <Table head={["Период", "Файл", "Загружен", "Рейсов", "Масса, кг", "Сумма, ₽", ""]}>
           {(batches ?? []).map((b) => (
-            <tr key={b.id}>
-              <td className="py-2 pr-4">
-                {formatShortDate(b.periodFrom)} — {formatShortDate(b.periodTo)}
-              </td>
-              <td className="py-2 pr-4">{b.sourceFileName}</td>
-              <td className="py-2 pr-4">{b.rowCount}</td>
-              <td className="py-2 pr-4">{fmt(b.totalMassKg)}</td>
-              <td className="py-2 pr-4">{fmtMoney(b.totalCost)}</td>
-              <td className="py-2 pr-4 text-right">
-                <button onClick={() => void deleteBatch(b.id)} className="text-red-600 text-xs hover:underline">
-                  Удалить
-                </button>
-              </td>
-            </tr>
+            <Fragment key={b.id}>
+              <tr>
+                <td className="py-2 pr-4">
+                  {formatShortDate(b.periodFrom)} — {formatShortDate(b.periodTo)}
+                </td>
+                <td className="py-2 pr-4">{b.sourceFileName}</td>
+                <td className="py-2 pr-4 text-slate-500 text-xs">
+                  {formatShortDate(b.createdAt)}
+                  {b.updatedAt !== b.createdAt && <div>заменён {formatShortDate(b.updatedAt)}</div>}
+                </td>
+                <td className="py-2 pr-4">{b.rowCount}</td>
+                <td className="py-2 pr-4">{fmt(b.totalMassKg)}</td>
+                <td className="py-2 pr-4">{fmtMoney(b.totalCost)}</td>
+                <td className="py-2 pr-4 text-right whitespace-nowrap">
+                  {b.hasFile && (
+                    <button onClick={() => void downloadOriginal(b)} className="text-sky-600 text-xs hover:underline mr-3">
+                      Скачать
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setReplacingId(replacingId === b.id ? null : b.id)}
+                    className="text-sky-600 text-xs hover:underline mr-3"
+                  >
+                    {replacingId === b.id ? "Отмена" : "Заменить файл"}
+                  </button>
+                  <button onClick={() => void deleteBatch(b.id)} className="text-red-600 text-xs hover:underline">
+                    Убрать
+                  </button>
+                </td>
+              </tr>
+              {replacingId === b.id && (
+                <tr>
+                  <td colSpan={7} className="pb-4 pt-2 bg-slate-50">
+                    <p className="text-sm text-slate-600 mb-2">
+                      Загрузите новый файл вместо текущего — рейсы этого импорта будут удалены и заменены новыми. Акты, реестр,
+                      итоговый акт и счёт за этот период при следующем открытии/скачивании построятся заново из новых данных.
+                    </p>
+                    <ImportUploadForm
+                      endpoint={`/api/documents/imports/${b.id}/replace`}
+                      onUploaded={() => {
+                        setReplacingId(null);
+                        void reload();
+                      }}
+                    />
+                  </td>
+                </tr>
+              )}
+            </Fragment>
           ))}
         </Table>
       </Card>

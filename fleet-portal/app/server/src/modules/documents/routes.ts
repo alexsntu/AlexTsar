@@ -1,9 +1,10 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyBaseLogger, FastifyInstance, FastifyRequest } from "fastify";
 import type { OrgProfile } from "@prisma/client";
 import { z } from "zod";
 import { round2 } from "../../lib/money.js";
 import { listSheetNames, parseSheet, ImportParseError, inferPeriodFromSheetName } from "./importParser.js";
 import { validateRows } from "./validate.js";
+import type { ValidatedRow } from "./types.js";
 import { buildDayActs, buildMonthSummary, buildRouteSummary, getMonthDeliveries } from "./queries.js";
 import { buildDayActWorkbook, buildFinalActWorkbook, buildInvoiceWorkbook, buildMonthActsWorkbook, buildRegistryWorkbook, type OrgContext } from "./xlsx.js";
 import { writeDocumentWorkbook } from "./layout.js";
@@ -65,6 +66,139 @@ async function getOrgContext(fastify: FastifyInstance): Promise<OrgContext> {
   return { supplier: byRole.get("SUPPLIER") ?? null, buyer: byRole.get("BUYER") ?? null };
 }
 
+/** Достаёт файл и (опционально) выбранный лист из multipart-запроса — общая
+ * часть для первой загрузки импорта и для его замены. */
+async function readUploadedFile(request: FastifyRequest): Promise<{ fileBuffer: Buffer | null; sourceFileName: string; sheetName?: string }> {
+  let fileBuffer: Buffer | null = null;
+  let sourceFileName = "";
+  let sheetName: string | undefined;
+  for await (const part of request.parts()) {
+    if (part.type === "file") {
+      fileBuffer = await part.toBuffer();
+      sourceFileName = part.filename;
+    } else if (part.fieldname === "sheetName" && typeof part.value === "string") {
+      sheetName = part.value;
+    }
+  }
+  return { fileBuffer, sourceFileName, sheetName };
+}
+
+type ParseImportOutcome =
+  | { ok: true; validated: ValidatedRow[]; periodFrom: Date; periodTo: Date; totalMassKg: number; totalCost: number }
+  | { ok: false; status: number; body: Record<string, unknown> };
+
+/** Разбирает и валидирует присланный .xlsx — общая часть для первой загрузки
+ * импорта (`POST /imports`) и для его замены (`POST /imports/:id/replace`):
+ * выбор листа (в т.ч. просьба выбрать вручную при нескольких кандидатах),
+ * sanity-check дат по имени листа, сверка со справочником адресов/тарифов.
+ * Ничего не пишет в БД — только парсинг и валидация. */
+async function parseAndValidateImportFile(
+  fastify: FastifyInstance,
+  logger: FastifyBaseLogger,
+  fileBuffer: Buffer,
+  sourceFileName: string,
+  sheetName: string | undefined,
+): Promise<ParseImportOutcome> {
+  const sheetNames = await listSheetNames(fileBuffer);
+
+  if (!sheetName) {
+    // Без выбранного листа пробуем разобрать каждый лист по очереди —
+    // "настоящий" лист с рейсами узнаётся по тому, что на нём вообще
+    // находится ожидаемая шапка таблицы и есть хотя бы одна строка данных
+    // (служебные вкладки вроде "адреса столовых"/"март" её не имеют).
+    // Если такой лист ровно один — используем его сразу, иначе просим
+    // пользователя выбрать вручную (с подсказкой по совпадению дат в имени).
+    const candidates: string[] = [];
+    let probeRows: Awaited<ReturnType<typeof parseSheet>> = [];
+    for (const name of sheetNames) {
+      try {
+        const rows = await parseSheet(fileBuffer, name);
+        if (rows.length > 0) {
+          candidates.push(name);
+          probeRows = rows;
+        }
+      } catch {
+        continue;
+      }
+    }
+    if (candidates.length === 0) {
+      return { ok: false, status: 400, body: { error: "no_data_sheet", sheets: sheetNames } };
+    }
+    if (candidates.length === 1) {
+      sheetName = candidates[0];
+    } else {
+      const dates = probeRows.map((r) => r.date.getTime());
+      const guessed = guessSheetName(candidates, new Date(Math.min(...dates)), new Date(Math.max(...dates)));
+      return { ok: false, status: 200, body: { needsSheetSelection: true, sheets: candidates, suggested: guessed ?? candidates[0] } };
+    }
+  }
+
+  let rows;
+  try {
+    rows = await parseSheet(fileBuffer, sheetName);
+  } catch (error) {
+    if (error instanceof ImportParseError) {
+      return { ok: false, status: 400, body: { error: "parse_error", message: error.message, sheets: sheetNames } };
+    }
+    throw error;
+  }
+  if (rows.length === 0) {
+    return { ok: false, status: 400, body: { error: "empty_sheet", sheets: sheetNames } };
+  }
+
+  // Санити-проверка дат по заявленному в имени листа периоду — ловит
+  // испорченные даты в исходнике (см. комментарий у inferPeriodFromSheetName),
+  // которые иначе тихо ломают группировку по дням в дальнейшем.
+  const referenceYear = rows[0].date.getUTCFullYear();
+  const declaredPeriod = inferPeriodFromSheetName(sheetName, referenceYear);
+  const dateErrors = declaredPeriod
+    ? rows
+        .filter((r) => r.date.getTime() < declaredPeriod.start.getTime() || r.date.getTime() > declaredPeriod.end.getTime())
+        .map((r) => ({
+          rowNumber: r.rowNumber,
+          date: r.date.toISOString().slice(0, 10),
+          addressText: r.addressText,
+          message: `Файл "${sourceFileName}", лист "${sheetName}", строка ${r.rowNumber}: дата ${r.date.toISOString().slice(0, 10)} вне периода ${declaredPeriod.start.toISOString().slice(0, 10)} — ${declaredPeriod.end.toISOString().slice(0, 10)}. Исправьте дату и загрузите верный файл повторно.`,
+        }))
+    : [];
+
+  if (dateErrors.length > 0) {
+    logger.warn({ sourceFileName, sheetName, errorCount: dateErrors.length }, "documents_import_rejected");
+    return { ok: false, status: 200, body: { accepted: false, errors: dateErrors } };
+  }
+
+  const [addresses, rates] = await Promise.all([fastify.prisma.address.findMany(), fastify.prisma.addressRate.findMany()]);
+  const result = validateRows(rows, addresses, rates);
+  if (result.errors.length > 0) {
+    // Отклонённый импорт — ожидаемый бизнес-исход (плохие вводные), не
+    // сбой сервера, но след в логе нужен: потом вместе с пользователем
+    // разобрать, что именно и почему не прошло по конкретному файлу.
+    logger.warn({ sourceFileName, sheetName, errorCount: result.errors.length }, "documents_import_rejected");
+    return { ok: false, status: 200, body: { accepted: false, errors: result.errors } };
+  }
+
+  const dates = result.validated.map((r) => r.date.getTime());
+  const periodFrom = new Date(Math.min(...dates));
+  const periodTo = new Date(Math.max(...dates));
+  const totalMassKg = result.validated.reduce((sum, r) => sum + r.massKg, 0);
+  const totalCost = round2(result.validated.reduce((sum, r) => sum + r.expectedCost, 0));
+
+  return { ok: true, validated: result.validated, periodFrom, periodTo, totalMassKg, totalCost };
+}
+
+function deliveryRowsFor(importBatchId: number, validated: ValidatedRow[]) {
+  return validated.map((r) => ({
+    importBatchId,
+    date: r.date,
+    addressId: r.addressId,
+    truckPlate: r.truckPlate,
+    distanceKm: r.distanceKm,
+    massKg: r.massKg,
+    ratePerKg: r.ratePerKg,
+    cost: r.expectedCost,
+  }));
+}
+
 export default async function documentsRoutes(fastify: FastifyInstance) {
   const writeGuard = { preHandler: [fastify.authenticate, fastify.requireRole(["ADMIN", "DISPATCHER"])] };
   const readGuard = { preHandler: [fastify.authenticate, fastify.requireRole(["ADMIN", "DISPATCHER"])] };
@@ -122,147 +256,109 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
 
   // ---------- Импорт присланного файла-расшифровки ----------
   fastify.post("/api/documents/imports", writeGuard, async (request, reply) => {
-    let fileBuffer: Buffer | null = null;
-    let sourceFileName = "";
-    let sheetName: string | undefined;
-
-    for await (const part of request.parts()) {
-      if (part.type === "file") {
-        fileBuffer = await part.toBuffer();
-        sourceFileName = part.filename;
-      } else if (part.fieldname === "sheetName" && typeof part.value === "string") {
-        sheetName = part.value;
-      }
-    }
+    const { fileBuffer, sourceFileName, sheetName } = await readUploadedFile(request);
     if (!fileBuffer) return reply.code(400).send({ error: "file_required" });
 
-    const sheetNames = await listSheetNames(fileBuffer);
+    const parsed = await parseAndValidateImportFile(fastify, request.log, fileBuffer, sourceFileName, sheetName);
+    if (!parsed.ok) return reply.code(parsed.status).send(parsed.body);
 
-    if (!sheetName) {
-      // Без выбранного листа пробуем разобрать каждый лист по очереди —
-      // "настоящий" лист с рейсами узнаётся по тому, что на нём вообще
-      // находится ожидаемая шапка таблицы и есть хотя бы одна строка данных
-      // (служебные вкладки вроде "адреса столовых"/"март" её не имеют).
-      // Если такой лист ровно один — используем его сразу, иначе просим
-      // пользователя выбрать вручную (с подсказкой по совпадению дат в имени).
-      const candidates: string[] = [];
-      let probeRows: Awaited<ReturnType<typeof parseSheet>> = [];
-      for (const name of sheetNames) {
-        try {
-          const rows = await parseSheet(fileBuffer, name);
-          if (rows.length > 0) {
-            candidates.push(name);
-            probeRows = rows;
-          }
-        } catch {
-          continue;
-        }
-      }
-      if (candidates.length === 0) {
-        return reply.code(400).send({ error: "no_data_sheet", sheets: sheetNames });
-      }
-      if (candidates.length === 1) {
-        sheetName = candidates[0];
-      } else {
-        const dates = probeRows.map((r) => r.date.getTime());
-        const guessed = guessSheetName(candidates, new Date(Math.min(...dates)), new Date(Math.max(...dates)));
-        return reply.send({ needsSheetSelection: true, sheets: candidates, suggested: guessed ?? candidates[0] });
-      }
-    }
-
-    let rows;
-    try {
-      rows = await parseSheet(fileBuffer, sheetName);
-    } catch (error) {
-      if (error instanceof ImportParseError) {
-        return reply.code(400).send({ error: "parse_error", message: error.message, sheets: sheetNames });
-      }
-      throw error;
-    }
-    if (rows.length === 0) {
-      return reply.code(400).send({ error: "empty_sheet", sheets: sheetNames });
-    }
-
-    // Санити-проверка дат по заявленному в имени листа периоду — ловит
-    // испорченные даты в исходнике (см. комментарий у inferPeriodFromSheetName),
-    // которые иначе тихо ломают группировку по дням в дальнейшем.
-    const referenceYear = rows[0].date.getUTCFullYear();
-    const declaredPeriod = inferPeriodFromSheetName(sheetName, referenceYear);
-    const dateErrors = declaredPeriod
-      ? rows
-          .filter((r) => r.date.getTime() < declaredPeriod.start.getTime() || r.date.getTime() > declaredPeriod.end.getTime())
-          .map((r) => ({
-            rowNumber: r.rowNumber,
-            date: r.date.toISOString().slice(0, 10),
-            addressText: r.addressText,
-            message: `Файл "${sourceFileName}", лист "${sheetName}", строка ${r.rowNumber}: дата ${r.date.toISOString().slice(0, 10)} вне периода ${declaredPeriod.start.toISOString().slice(0, 10)} — ${declaredPeriod.end.toISOString().slice(0, 10)}. Исправьте дату и загрузите верный файл повторно.`,
-          }))
-      : [];
-
-    if (dateErrors.length > 0) {
-      request.log.warn({ sourceFileName, sheetName, errorCount: dateErrors.length }, "documents_import_rejected");
-      return reply.send({ accepted: false, errors: dateErrors });
-    }
-
-    const [addresses, rates] = await Promise.all([fastify.prisma.address.findMany(), fastify.prisma.addressRate.findMany()]);
-    const result = validateRows(rows, addresses, rates);
-    const allErrors = result.errors;
-    if (allErrors.length > 0) {
-      // Отклонённый импорт — ожидаемый бизнес-исход (плохие вводные), не
-      // сбой сервера, но след в логе нужен: потом вместе с пользователем
-      // разобрать, что именно и почему не прошло по конкретному файлу.
-      request.log.warn({ sourceFileName, sheetName, errorCount: allErrors.length }, "documents_import_rejected");
-      return reply.send({ accepted: false, errors: allErrors });
-    }
-
-    const dates = result.validated.map((r) => r.date.getTime());
-    const periodFrom = new Date(Math.min(...dates));
-    const periodTo = new Date(Math.max(...dates));
-
-    const overlap = await fastify.prisma.delivery.findFirst({ where: { date: { gte: periodFrom, lte: periodTo } } });
+    const overlap = await fastify.prisma.delivery.findFirst({ where: { date: { gte: parsed.periodFrom, lte: parsed.periodTo } } });
     if (overlap) {
       return reply.code(409).send({
         error: "period_already_imported",
-        message: "За этот период уже загружены рейсы — сначала удалите старый импорт (вкладка «Импорт»), если нужно перезагрузить.",
+        message: "За этот период уже загружены рейсы — если нужно перезагрузить, воспользуйтесь «Заменить файл» у нужного импорта (вкладка «Импорт»).",
       });
     }
-
-    const totalMassKg = result.validated.reduce((sum, r) => sum + r.massKg, 0);
-    const totalCost = round2(result.validated.reduce((sum, r) => sum + r.expectedCost, 0));
 
     const batch = await fastify.prisma.$transaction(async (tx) => {
       const created = await tx.importBatch.create({
         data: {
-          periodFrom,
-          periodTo,
+          periodFrom: parsed.periodFrom,
+          periodTo: parsed.periodTo,
           sourceFileName,
-          rowCount: result.validated.length,
-          totalMassKg,
-          totalCost,
+          rowCount: parsed.validated.length,
+          totalMassKg: parsed.totalMassKg,
+          totalCost: parsed.totalCost,
+          fileData: fileBuffer,
           createdBy: request.user!.id,
         },
       });
-      await tx.delivery.createMany({
-        data: result.validated.map((r) => ({
-          importBatchId: created.id,
-          date: r.date,
-          addressId: r.addressId,
-          truckPlate: r.truckPlate,
-          distanceKm: r.distanceKm,
-          massKg: r.massKg,
-          ratePerKg: r.ratePerKg,
-          cost: r.expectedCost,
-        })),
-      });
+      await tx.delivery.createMany({ data: deliveryRowsFor(created.id, parsed.validated) });
       return created;
     });
 
     request.log.info({ batchId: batch.id, sourceFileName, sheetName, rowCount: batch.rowCount }, "documents_import_accepted");
-    return reply.send({ accepted: true, batch });
+    const { fileData: _fileData, ...batchWithoutFile } = batch;
+    return reply.send({ accepted: true, batch: { ...batchWithoutFile, hasFile: true } });
+  });
+
+  // Заменяет файл уже существующего импорта: старые рейсы этого импорта
+  // удаляются, новые — сохраняются под тем же ImportBatch.id. Документы
+  // (акты/реестр/итоговый акт/счёт) ничего не хранят сами — они всегда
+  // строятся заново из Delivery на момент скачивания (см. sendWorkbook
+  // ниже), поэтому отдельного шага "пересчитать" не нужно: следующее
+  // скачивание любого документа за этот период уже увидит новые данные.
+  fastify.post<{ Params: { id: string } }>("/api/documents/imports/:id/replace", writeGuard, async (request, reply) => {
+    const id = Number(request.params.id);
+    const existing = await fastify.prisma.importBatch.findUnique({ where: { id } });
+    if (!existing) return reply.code(404).send({ error: "not_found" });
+
+    const { fileBuffer, sourceFileName, sheetName } = await readUploadedFile(request);
+    if (!fileBuffer) return reply.code(400).send({ error: "file_required" });
+
+    const parsed = await parseAndValidateImportFile(fastify, request.log, fileBuffer, sourceFileName, sheetName);
+    if (!parsed.ok) return reply.code(parsed.status).send(parsed.body);
+
+    // Пересечение проверяем с ЧУЖИМИ импортами — свои собственные старые
+    // рейсы (которые вот-вот заменим) пересечению не мешают.
+    const overlap = await fastify.prisma.delivery.findFirst({
+      where: { date: { gte: parsed.periodFrom, lte: parsed.periodTo }, importBatchId: { not: id } },
+    });
+    if (overlap) {
+      return reply.code(409).send({
+        error: "period_already_imported",
+        message: "За этот период уже загружены рейсы в другом импорте — сначала удалите его, если этот файл должен заменить его тоже.",
+      });
+    }
+
+    const batch = await fastify.prisma.$transaction(async (tx) => {
+      await tx.delivery.deleteMany({ where: { importBatchId: id } });
+      const updated = await tx.importBatch.update({
+        where: { id },
+        data: {
+          periodFrom: parsed.periodFrom,
+          periodTo: parsed.periodTo,
+          sourceFileName,
+          rowCount: parsed.validated.length,
+          totalMassKg: parsed.totalMassKg,
+          totalCost: parsed.totalCost,
+          fileData: fileBuffer,
+        },
+      });
+      await tx.delivery.createMany({ data: deliveryRowsFor(id, parsed.validated) });
+      return updated;
+    });
+
+    request.log.info({ batchId: batch.id, sourceFileName, sheetName, rowCount: batch.rowCount }, "documents_import_replaced");
+    const { fileData: _fileData, ...batchWithoutFile } = batch;
+    return reply.send({ accepted: true, batch: { ...batchWithoutFile, hasFile: true } });
   });
 
   fastify.get("/api/documents/imports", readGuard, async () => {
-    return fastify.prisma.importBatch.findMany({ orderBy: { periodFrom: "desc" } });
+    const batches = await fastify.prisma.importBatch.findMany({ orderBy: { periodFrom: "desc" } });
+    return batches.map(({ fileData, ...rest }) => ({ ...rest, hasFile: fileData != null }));
+  });
+
+  // Отдаёт исходный присланный файл как есть — чтобы можно было посмотреть,
+  // какой именно файл сейчас лежит в основе рейсов за этот период (после
+  // "Заменить файл" — это уже новый файл, старый нигде не хранится).
+  fastify.get<{ Params: { id: string } }>("/api/documents/imports/:id/download", readGuard, async (request, reply) => {
+    const batch = await fastify.prisma.importBatch.findUnique({ where: { id: Number(request.params.id) } });
+    if (!batch?.fileData) return reply.code(404).send({ error: "not_found" });
+    reply
+      .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      .header("Content-Disposition", `attachment; filename="${encodeURIComponent(batch.sourceFileName)}"`)
+      .send(Buffer.from(batch.fileData));
   });
 
   fastify.delete<{ Params: { id: string } }>("/api/documents/imports/:id", writeGuard, async (request) => {

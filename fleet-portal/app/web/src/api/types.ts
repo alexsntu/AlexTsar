@@ -234,6 +234,8 @@ export interface ImportBatch {
   totalMassKg: number;
   totalCost: number;
   createdAt: string;
+  updatedAt: string;
+  hasFile: boolean;
 }
 
 export interface ImportRowError {
