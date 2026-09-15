@@ -275,6 +275,41 @@ model Delivery {
   @@index([truckPlate, date])
 }
 
+// Роялти — начисление конкретному получателю (напр. "Роялти 1"), состоящее
+// из одного или нескольких условий (RoyaltyCondition): свой процент от суммы
+// доставок своего набора машин. Итог по Роялти — сумма его условий; машины
+// НЕ обязаны быть уникальны между условиями и между разными Роялти — одна и
+// та же доставка может участвовать в расчёте нескольких роялти одновременно
+// (разным людям, каждому свой процент — это намеренно, не ошибка).
+model Royalty {
+  id         Int                @id @default(autoincrement())
+  name       String
+  // Порядок отображения (Роялти 1, Роялти 2, ...) — задаётся явно, чтобы
+  // пользователь мог менять местами через UI, а не полагаться на дату создания.
+  order      Int                @default(0)
+  conditions RoyaltyCondition[]
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+}
+
+// Сопоставление с Delivery — по точному тексту госномера (Delivery.truckPlate),
+// без FK на Truck: так же работает группировка в RouteSummaryRow, и один и тот
+// же госномер за разные месяцы может относиться к разным реальным машинам в
+// парке — здесь это неважно, условие привязано к строке "Гос номер" из файла.
+model RoyaltyCondition {
+  id         Int      @id @default(autoincrement())
+  royalty    Royalty  @relation(fields: [royaltyId], references: [id], onDelete: Cascade)
+  royaltyId  Int
+  percent    Float
+  order      Int      @default(0)
+  // JSON-массив госномеров, включённых в условие, напр. ["У703ХО82","А589ВС82"].
+  trucksJson String   @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([royaltyId])
+}
+
 // Создаётся один раз при закрытии месяца — фиксирует номер/дату счёта
 // (вводятся вручную, истории для автонумерации нет) и производные
 // номер/дату итогового акта, на которые ссылаются реестр, итоговый акт и

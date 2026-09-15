@@ -1,0 +1,10 @@
+-- CreateTable
+CREATE TABLE "BonusGroup" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "percent" REAL NOT NULL,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "trucksJson" TEXT NOT NULL DEFAULT '[]',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);

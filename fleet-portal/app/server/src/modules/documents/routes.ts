@@ -6,6 +6,7 @@ import { listSheetNames, parseSheet, ImportParseError, inferPeriodFromSheetName 
 import { validateRows } from "./validate.js";
 import type { ValidatedRow } from "./types.js";
 import { buildDayActs, buildMonthSummary, buildRouteSummary, getMonthDeliveries } from "./queries.js";
+import { buildRoyaltySummary, listKnownTruckPlates, listRoyalties, toRoyaltyConditionConfig, toRoyaltyConfig } from "./royalties.js";
 import { buildDayActWorkbook, buildFinalActWorkbook, buildInvoiceWorkbook, buildMonthActsWorkbook, buildRegistryWorkbook, type OrgContext } from "./xlsx.js";
 import { writeDocumentWorkbook } from "./layout.js";
 
@@ -45,6 +46,17 @@ const monthClosingSchema = z.object({
 });
 
 const monthQuerySchema = z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) });
+
+const royaltySchema = z.object({
+  name: z.string().min(1).max(100),
+  order: z.number().int().optional(),
+});
+
+const royaltyConditionSchema = z.object({
+  percent: z.number().min(0).max(1000),
+  order: z.number().int().optional(),
+  trucks: z.array(z.string().min(1).max(50)).max(200),
+});
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -390,6 +402,88 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
     if (!parsed.success) return reply.code(400).send({ error: "invalid_query" });
     const deliveries = await getMonthDeliveries(fastify.prisma, parsed.data.month);
     return buildMonthSummary(deliveries);
+  });
+
+  // ---------- Роялти ----------
+  // Источник чек-листа машин при настройке условий — точные госномера из уже
+  // загруженных доставок (см. royalties.ts: сопоставление условий с Delivery
+  // идёт по этому же тексту, руками госномер лучше не вписывать).
+  fastify.get("/api/documents/truck-plates", readGuard, async () => {
+    return listKnownTruckPlates(fastify.prisma);
+  });
+
+  fastify.get("/api/documents/royalties", readGuard, async () => {
+    return listRoyalties(fastify.prisma);
+  });
+
+  fastify.post("/api/documents/royalties", writeGuard, async (request, reply) => {
+    const parsed = royaltySchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    const maxOrder = await fastify.prisma.royalty.aggregate({ _max: { order: true } });
+    const created = await fastify.prisma.royalty.create({
+      data: { name: parsed.data.name, order: parsed.data.order ?? (maxOrder._max.order ?? 0) + 1 },
+      include: { conditions: true },
+    });
+    return toRoyaltyConfig(created);
+  });
+
+  fastify.patch<{ Params: { id: string } }>("/api/documents/royalties/:id", writeGuard, async (request, reply) => {
+    const parsed = royaltySchema.partial().safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    const updated = await fastify.prisma.royalty.update({
+      where: { id: Number(request.params.id) },
+      data: parsed.data,
+      include: { conditions: { orderBy: [{ order: "asc" }, { id: "asc" }] } },
+    });
+    return toRoyaltyConfig(updated);
+  });
+
+  // Условия удаляются каскадом на уровне БД (onDelete: Cascade в схеме).
+  fastify.delete<{ Params: { id: string } }>("/api/documents/royalties/:id", writeGuard, async (request) => {
+    await fastify.prisma.royalty.delete({ where: { id: Number(request.params.id) } });
+    return { ok: true };
+  });
+
+  fastify.post<{ Params: { id: string } }>("/api/documents/royalties/:id/conditions", writeGuard, async (request, reply) => {
+    const parsed = royaltyConditionSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    const royaltyId = Number(request.params.id);
+    const maxOrder = await fastify.prisma.royaltyCondition.aggregate({ _max: { order: true }, where: { royaltyId } });
+    const created = await fastify.prisma.royaltyCondition.create({
+      data: {
+        royaltyId,
+        percent: parsed.data.percent,
+        order: parsed.data.order ?? (maxOrder._max.order ?? 0) + 1,
+        trucksJson: JSON.stringify(parsed.data.trucks),
+      },
+    });
+    return toRoyaltyConditionConfig(created);
+  });
+
+  fastify.patch<{ Params: { id: string } }>("/api/documents/royalty-conditions/:id", writeGuard, async (request, reply) => {
+    const parsed = royaltyConditionSchema.partial().safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    const { trucks, ...rest } = parsed.data;
+    const updated = await fastify.prisma.royaltyCondition.update({
+      where: { id: Number(request.params.id) },
+      data: { ...rest, ...(trucks ? { trucksJson: JSON.stringify(trucks) } : {}) },
+    });
+    return toRoyaltyConditionConfig(updated);
+  });
+
+  fastify.delete<{ Params: { id: string } }>("/api/documents/royalty-conditions/:id", writeGuard, async (request) => {
+    await fastify.prisma.royaltyCondition.delete({ where: { id: Number(request.params.id) } });
+    return { ok: true };
+  });
+
+  fastify.get("/api/documents/royalties-summary", readGuard, async (request, reply) => {
+    const parsed = monthQuerySchema.safeParse(request.query);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_query" });
+    const [deliveries, royalties] = await Promise.all([
+      getMonthDeliveries(fastify.prisma, parsed.data.month),
+      listRoyalties(fastify.prisma),
+    ]);
+    return buildRoyaltySummary(deliveries, royalties);
   });
 
   // ---------- Закрытие месяца ----------

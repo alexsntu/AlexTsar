@@ -2,11 +2,24 @@ import { Fragment, useState, type FormEvent } from "react";
 import { api } from "../../api/client";
 import { describeError } from "../../api/errors";
 import { useApi } from "../../hooks/useApi";
-import type { DayAct, ImportBatch, ImportResult, MonthClosing, MonthSummaryLine, RouteSummaryRow } from "../../api/types";
+import type {
+  DayAct,
+  ImportBatch,
+  ImportResult,
+  MonthClosing,
+  MonthSummaryLine,
+  Royalty,
+  RoyaltyCondition,
+  RoyaltyConditionResult,
+  RoyaltyResult,
+  RoyaltySummary,
+  RoyaltyTruckBreakdown,
+  RouteSummaryRow,
+} from "../../api/types";
 import { Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
 import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
-const TABS = ["Импорт", "Итоги маршрутов", "Журнал"] as const;
+const TABS = ["Импорт", "Итоги маршрутов", "Роялти", "Журнал"] as const;
 type Tab = (typeof TABS)[number];
 
 function fmt(n: number): string {
@@ -257,6 +270,347 @@ function RouteSummarySection() {
   );
 }
 
+/** Форма нового условия внутри роялти — само условие создаётся сразу без
+ * машин, состав донастраивается чек-листом в RoyaltyConditionEditor (список
+ * госномеров подгружен там же — дублировать его в форме создания незачем). */
+function AddConditionForm({ royaltyId, onAdded }: { royaltyId: number; onAdded: () => void }) {
+  const [percent, setPercent] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await api.post(`/api/documents/royalties/${royaltyId}/conditions`, { percent: Number(percent), trucks: [] });
+      setPercent("");
+      onAdded();
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 items-end flex-wrap">
+      <div className="w-40">
+        <Field label="Процент нового условия, %">
+          <Input type="number" min="0" max="1000" step="0.1" value={percent} onChange={(e) => setPercent(e.target.value)} required />
+        </Field>
+      </div>
+      <Button type="submit" variant="secondary" disabled={saving}>
+        {saving ? "Добавляем…" : "Добавить условие"}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </form>
+  );
+}
+
+/** Редактор одного условия роялти: процент и чек-лист машин — галочками по
+ * реально встречавшимся госномерам (allPlates), а не свободным текстом,
+ * чтобы не разойтись с написанием в загруженных файлах. Одна и та же машина
+ * может стоять сразу в нескольких условиях (в т.ч. разных роялти) — это
+ * осознанно допустимо, см. Card title="Настройка роялти" ниже. */
+function RoyaltyConditionEditor({
+  condition,
+  allPlates,
+  onSaved,
+  onDeleted,
+}: {
+  condition: RoyaltyCondition;
+  allPlates: string[];
+  onSaved: () => void;
+  onDeleted: () => void;
+}) {
+  const [percent, setPercent] = useState(String(condition.percent));
+  const [trucks, setTrucks] = useState<string[]>(condition.trucks);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const dirty = Number(percent) !== condition.percent || trucks.join(",") !== condition.trucks.join(",");
+
+  function toggleTruck(plate: string) {
+    setTrucks((prev) => (prev.includes(plate) ? prev.filter((p) => p !== plate) : [...prev, plate]));
+  }
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    try {
+      await api.patch(`/api/documents/royalty-conditions/${condition.id}`, { percent: Number(percent), trucks });
+      onSaved();
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function remove() {
+    if (!window.confirm("Удалить это условие роялти?")) return;
+    await api.delete(`/api/documents/royalty-conditions/${condition.id}`);
+    onDeleted();
+  }
+
+  return (
+    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-2">
+      <div className="flex gap-2 items-end flex-wrap mb-2">
+        <div className="w-28">
+          <Field label="Процент, %">
+            <Input type="number" min="0" max="1000" step="0.1" value={percent} onChange={(e) => setPercent(e.target.value)} />
+          </Field>
+        </div>
+        <Button onClick={() => void save()} disabled={!dirty || saving}>
+          {saving ? "Сохраняем…" : "Сохранить"}
+        </Button>
+        <Button variant="danger" onClick={() => void remove()}>
+          Удалить условие
+        </Button>
+      </div>
+      <p className="text-xs font-medium text-slate-500 mb-1">Машины в этом условии (по госномеру из загруженных файлов)</p>
+      <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-white rounded-lg border border-slate-100">
+        {allPlates.length === 0 && (
+          <span className="text-xs text-slate-400">Пока нет загруженных доставок — список госномеров появится после первого импорта.</span>
+        )}
+        {allPlates.map((plate) => (
+          <label key={plate} className="flex items-center gap-1 text-sm px-2 py-1 rounded bg-slate-50 border border-slate-200 cursor-pointer">
+            <input type="checkbox" checked={trucks.includes(plate)} onChange={() => toggleTruck(plate)} />
+            {plate}
+          </label>
+        ))}
+      </div>
+      <ErrorText>{error}</ErrorText>
+    </div>
+  );
+}
+
+/** Карточка настройки одного роялти целиком: название + список его условий
+ * + форма добавления нового условия. onChanged общий на все вложенные
+ * действия — проще одним колбэком перезагрузить и список роялти, и месячный
+ * расчёт (см. RoyaltiesSection), чем городить отдельные пути для каждого. */
+function RoyaltyEditor({ royalty, allPlates, onChanged }: { royalty: Royalty; allPlates: string[]; onChanged: () => void }) {
+  const [name, setName] = useState(royalty.name);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const nameDirty = name !== royalty.name;
+
+  async function saveName() {
+    setSaving(true);
+    setError(null);
+    try {
+      await api.patch(`/api/documents/royalties/${royalty.id}`, { name });
+      onChanged();
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeRoyalty() {
+    if (!window.confirm(`Удалить «${royalty.name}» вместе со всеми его условиями? Это необратимо.`)) return;
+    await api.delete(`/api/documents/royalties/${royalty.id}`);
+    onChanged();
+  }
+
+  return (
+    <div className="p-3 rounded-lg border border-slate-300 mb-4">
+      <div className="flex gap-2 items-end flex-wrap mb-3">
+        <div className="w-64">
+          <Field label="Название">
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+        </div>
+        <Button onClick={() => void saveName()} disabled={!nameDirty || saving}>
+          {saving ? "Сохраняем…" : "Сохранить название"}
+        </Button>
+        <Button variant="danger" onClick={() => void removeRoyalty()}>
+          Удалить {royalty.name}
+        </Button>
+      </div>
+      <ErrorText>{error}</ErrorText>
+      {royalty.conditions.map((c) => (
+        <RoyaltyConditionEditor key={c.id} condition={c} allPlates={allPlates} onSaved={onChanged} onDeleted={onChanged} />
+      ))}
+      <AddConditionForm royaltyId={royalty.id} onAdded={onChanged} />
+    </div>
+  );
+}
+
+function AddRoyaltyForm({ onAdded }: { onAdded: () => void }) {
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await api.post("/api/documents/royalties", { name });
+      setName("");
+      onAdded();
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 items-end flex-wrap">
+      <div className="w-64">
+        <Field label="Название нового роялти">
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Роялти 3" required />
+        </Field>
+      </div>
+      <Button type="submit" disabled={saving}>
+        {saving ? "Добавляем…" : "Добавить роялти"}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </form>
+  );
+}
+
+/** onChanged — сигнал наверх для RoyaltiesMonthSection: без него расчёт за
+ * месяц (отдельный useApi) не узнаёт о правках состава/процента условий и
+ * показывает устаревшие суммы до ручного обновления страницы. */
+function RoyaltiesConfig({ onChanged }: { onChanged: () => void }) {
+  const { data: royalties, reload: reloadRoyalties } = useApi<Royalty[]>("/api/documents/royalties");
+  const { data: plates } = useApi<string[]>("/api/documents/truck-plates");
+
+  async function reloadAll() {
+    await reloadRoyalties();
+    onChanged();
+  }
+
+  return (
+    <Card title="Настройка роялти">
+      <p className="text-sm text-slate-500 mb-3">
+        Каждое роялти — начисление одному получателю, может состоять из нескольких условий (свой процент от суммы доставок
+        своего набора машин), итог по роялти — сумма его условий. Одна и та же машина может входить в условия разных
+        роялти одновременно — если её рейсы должны достаться нескольким людям, это ожидаемо, а не ошибка.
+      </p>
+      {(royalties ?? []).map((r) => (
+        <RoyaltyEditor key={r.id} royalty={r} allPlates={plates ?? []} onChanged={() => void reloadAll()} />
+      ))}
+      <AddRoyaltyForm onAdded={() => void reloadAll()} />
+    </Card>
+  );
+}
+
+function RoyaltyTruckPreview({ truck }: { truck: RoyaltyTruckBreakdown }) {
+  return (
+    <div className="mt-2 mb-2 pl-4 border-l-2 border-slate-100">
+      <Table head={["Дата", "Адрес", "Кг", "Сумма"]}>
+        {truck.trips.map((t, i) => (
+          <tr key={i}>
+            <td className="py-1 pr-3">{formatShortDate(t.date)}</td>
+            <td className="py-1 pr-3">{t.addressText}</td>
+            <td className="py-1 pr-3">{fmt(t.massKg)}</td>
+            <td className="py-1 pr-3">{fmtMoney(t.cost)}</td>
+          </tr>
+        ))}
+      </Table>
+    </div>
+  );
+}
+
+function RoyaltyConditionCard({ condition }: { condition: RoyaltyConditionResult }) {
+  const [expandedTruck, setExpandedTruck] = useState<string | null>(null);
+  return (
+    <div className="pl-3 border-l-2 border-slate-100 mb-3">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-1 text-sm">
+        <span className="text-slate-600">
+          {fmt(condition.percent)}% — {condition.trucks.length > 0 ? condition.trucks.join(", ") : "машины не выбраны"}
+        </span>
+        <span>
+          База: {fmtMoney(condition.totalCost)} ₽ → <span className="font-semibold">{fmtMoney(condition.amount)} ₽</span>
+        </span>
+      </div>
+      {condition.byTruck.map((t) => (
+        <div key={t.truckPlate} className="py-1 border-b border-slate-50 last:border-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap text-sm">
+            <span>
+              {t.truckPlate} — {t.trips.length} {t.trips.length === 1 ? "поездка" : "поездок"}, {fmtMoney(t.totalCost)} ₽
+            </span>
+            <button
+              onClick={() => setExpandedTruck(expandedTruck === t.truckPlate ? null : t.truckPlate)}
+              className="text-sky-600 text-xs hover:underline"
+            >
+              {expandedTruck === t.truckPlate ? "Скрыть" : "Расшифровка"}
+            </button>
+          </div>
+          {expandedTruck === t.truckPlate && <RoyaltyTruckPreview truck={t} />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RoyaltyCard({ royalty }: { royalty: RoyaltyResult }) {
+  return (
+    <div className="p-3 rounded-lg border border-slate-200 mb-3">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+        <span className="font-semibold text-slate-800">{royalty.name}</span>
+        <span className="text-sm font-semibold">{fmtMoney(royalty.totalAmount)} ₽</span>
+      </div>
+      {royalty.conditions.length === 0 && (
+        <p className="text-xs text-slate-400">У роялти пока нет условий — настройте в разделе «Настройка роялти» выше.</p>
+      )}
+      {royalty.conditions.map((c) => (
+        <RoyaltyConditionCard key={c.conditionId} condition={c} />
+      ))}
+    </div>
+  );
+}
+
+function RoyaltiesMonthSection({ refreshKey }: { refreshKey: number }) {
+  const [month, setMonth] = useState(() => currentYearMonth());
+  const { data: summary } = useApi<RoyaltySummary>(`/api/documents/royalties-summary?month=${month}`, [month, refreshKey]);
+
+  return (
+    <Card title="Роялти за месяц">
+      <MonthPicker month={month} onChange={setMonth} />
+      {(summary?.royalties ?? []).length === 0 && <p className="text-slate-400 text-sm mb-2">Роялти ещё не настроены.</p>}
+      {(summary?.royalties ?? []).map((r) => (
+        <RoyaltyCard key={r.royaltyId} royalty={r} />
+      ))}
+      {summary && summary.royalties.length > 0 && (
+        <div className="p-3 rounded-lg bg-sky-50 border border-sky-200 mt-2">
+          <span className="text-sm font-semibold text-sky-800">
+            Общий итог по всем роялти за {month}: {fmtMoney(summary.grandTotal)} ₽
+          </span>
+        </div>
+      )}
+      {summary && summary.unassignedTrucks.length > 0 && (
+        <div className="mt-3">
+          <p className="text-xs font-medium text-slate-500 mb-1">Машины без роялти за этот месяц</p>
+          <ul className="text-xs text-slate-500 space-y-0.5">
+            {summary.unassignedTrucks.map((t) => (
+              <li key={t.truckPlate}>
+                {t.truckPlate} — {fmtMoney(t.totalCost)} ₽
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function RoyaltiesSection() {
+  const [refreshKey, setRefreshKey] = useState(0);
+  return (
+    <div>
+      <RoyaltiesConfig onChanged={() => setRefreshKey((k) => k + 1)} />
+      <RoyaltiesMonthSection refreshKey={refreshKey} />
+    </div>
+  );
+}
+
 function DayActPreview({ act }: { act: DayAct }) {
   return (
     <div className="mt-2 mb-3 pl-4 border-l-2 border-slate-100">
@@ -482,6 +836,7 @@ export function DocumentsPage() {
       </div>
       {tab === "Импорт" && <ImportSection />}
       {tab === "Итоги маршрутов" && <RouteSummarySection />}
+      {tab === "Роялти" && <RoyaltiesSection />}
       {tab === "Журнал" && <JournalSection />}
     </div>
   );

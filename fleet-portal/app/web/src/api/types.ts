@@ -294,6 +294,56 @@ export interface MonthSummaryLine {
   maxDate: string;
 }
 
+export interface RoyaltyCondition {
+  id: number;
+  percent: number;
+  order: number;
+  trucks: string[];
+}
+
+export interface Royalty {
+  id: number;
+  name: string;
+  order: number;
+  conditions: RoyaltyCondition[];
+}
+
+export interface RoyaltyTripLine {
+  date: string;
+  addressText: string;
+  massKg: number;
+  cost: number;
+}
+
+export interface RoyaltyTruckBreakdown {
+  truckPlate: string;
+  totalCost: number;
+  trips: RoyaltyTripLine[];
+}
+
+export interface RoyaltyConditionResult {
+  conditionId: number;
+  percent: number;
+  trucks: string[];
+  totalCost: number;
+  amount: number;
+  byTruck: RoyaltyTruckBreakdown[];
+}
+
+export interface RoyaltyResult {
+  royaltyId: number;
+  name: string;
+  order: number;
+  conditions: RoyaltyConditionResult[];
+  totalAmount: number;
+}
+
+export interface RoyaltySummary {
+  royalties: RoyaltyResult[];
+  grandTotal: number;
+  unassignedTrucks: { truckPlate: string; totalCost: number }[];
+}
+
 export interface MonthClosing {
   id: number;
   yearMonth: string;
