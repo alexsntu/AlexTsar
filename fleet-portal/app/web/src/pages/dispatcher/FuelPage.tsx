@@ -100,7 +100,7 @@ function LotsSection() {
       <InOutDashboard />
       <Card title="Приход топлива" collapsible>
         <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
-          <div className="w-40">
+          <div className="w-full sm:w-40">
             <Field label="Вид топлива">
               <Select value={fuelTypeId} onChange={(e) => setFuelTypeId(e.target.value)} required>
                 <option value="">—</option>
@@ -112,27 +112,27 @@ function LotsSection() {
               </Select>
             </Field>
           </div>
-          <div className="w-36">
+          <div className="w-full sm:w-36">
             <Field label="Дата">
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </Field>
           </div>
-          <div className="w-28">
+          <div className="w-full sm:w-28">
             <Field label="Литры">
               <Input type="number" min="0" step="0.01" value={liters} onChange={(e) => setLiters(e.target.value)} required />
             </Field>
           </div>
-          <div className="w-32">
+          <div className="w-full sm:w-32">
             <Field label="Цена за литр">
               <Input type="number" min="0" step="0.01" value={pricePerLiter} onChange={(e) => setPricePerLiter(e.target.value)} />
             </Field>
           </div>
-          <div className="w-32">
+          <div className="w-full sm:w-32">
             <Field label="Или сумма">
               <Input type="number" min="0" step="0.01" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} />
             </Field>
           </div>
-          <div className="w-40">
+          <div className="w-full sm:w-40">
             <Field label="Поставщик">
               <Input value={supplier} onChange={(e) => setSupplier(e.target.value)} />
             </Field>
@@ -534,7 +534,7 @@ function WithdrawalsSection() {
       <FuelDashboard />
       <Card title="Заправка (списание топлива)" collapsible>
       <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
-        <div className="w-40">
+        <div className="w-full sm:w-40">
           <Field label="Вид топлива">
             <Select value={fuelTypeId} onChange={(e) => setFuelTypeId(e.target.value)} required>
               <option value="">—</option>
@@ -546,17 +546,17 @@ function WithdrawalsSection() {
             </Select>
           </Field>
         </div>
-        <div className="w-36">
+        <div className="w-full sm:w-36">
           <Field label="Дата">
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </Field>
         </div>
-        <div className="w-28">
+        <div className="w-full sm:w-28">
           <Field label="Литры">
             <Input type="number" min="0" step="0.01" value={liters} onChange={(e) => setLiters(e.target.value)} required />
           </Field>
         </div>
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Field label="Получатель">
             <Select value={isPersonal ? "personal" : "truck"} onChange={(e) => setIsPersonal(e.target.value === "personal")}>
               <option value="truck">Служебный транспорт</option>
@@ -565,14 +565,14 @@ function WithdrawalsSection() {
           </Field>
         </div>
         {isPersonal ? (
-          <div className="w-64">
+          <div className="w-full sm:w-64">
             <Field label="Чьё авто (комментарий)">
               <Input value={personalComment} onChange={(e) => setPersonalComment(e.target.value)} required />
             </Field>
           </div>
         ) : (
           <>
-            <div className="w-40">
+            <div className="w-full sm:w-40">
               <Field label="Машина">
                 <Select value={truckId} onChange={(e) => setTruckId(e.target.value)} required>
                   <option value="">—</option>
@@ -584,7 +584,7 @@ function WithdrawalsSection() {
                 </Select>
               </Field>
             </div>
-            <div className="w-32">
+            <div className="w-full sm:w-32">
               <Field label="Одометр">
                 <Input type="number" min="0" value={odometer} onChange={(e) => setOdometer(e.target.value)} />
               </Field>

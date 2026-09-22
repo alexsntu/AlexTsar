@@ -22,6 +22,7 @@ const truckObjectSchema = z.object({
   lastServiceOdometer: z.union([z.null(), z.number().nonnegative().max(10_000_000)]).optional(),
   insuranceExpiryDate: clearableDate,
   inspectionExpiryDate: clearableDate,
+  serviceNote: z.union([z.null(), z.string().max(2000)]).optional(),
 });
 
 const NORM_RANGE_MESSAGE = { message: "Норма расхода: минимум не может быть больше максимума", path: ["normConsumptionMin"] };

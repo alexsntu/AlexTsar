@@ -46,6 +46,7 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
   const [lastOdometer, setLastOdometer] = useState(truck.lastServiceOdometer?.toString() ?? "");
   const [insuranceExpiryDate, setInsuranceExpiryDate] = useState(truck.insuranceExpiryDate?.slice(0, 10) ?? "");
   const [inspectionExpiryDate, setInspectionExpiryDate] = useState(truck.inspectionExpiryDate?.slice(0, 10) ?? "");
+  const [serviceNote, setServiceNote] = useState(truck.serviceNote ?? "");
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
@@ -61,6 +62,7 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
         lastServiceOdometer: lastOdometer ? Number(lastOdometer) : null,
         insuranceExpiryDate: insuranceExpiryDate || null,
         inspectionExpiryDate: inspectionExpiryDate || null,
+        serviceNote: serviceNote || null,
       });
       onDone();
     } catch (err) {
@@ -98,6 +100,11 @@ function ScheduleForm({ truck, onDone }: { truck: Truck; onDone: () => void }) {
       <div className="w-36">
         <Field label="Техосмотр до">
           <Input type="date" value={inspectionExpiryDate} onChange={(e) => setInspectionExpiryDate(e.target.value)} />
+        </Field>
+      </div>
+      <div className="w-full">
+        <Field label="Комментарий (что надо сделать по машине)">
+          <Textarea rows={2} value={serviceNote} onChange={(e) => setServiceNote(e.target.value)} />
         </Field>
       </div>
       <Button type="submit">Сохранить</Button>
@@ -148,6 +155,12 @@ function LastServiceCell({ truck }: { truck: Truck }) {
   );
 }
 
+/** Комментарий по машине ("что надо сделать") — виден сразу, чтобы не забыть. */
+function ServiceNoteLine({ note }: { note: string | null }) {
+  if (!note) return null;
+  return <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 mt-1 whitespace-pre-wrap break-words">{note}</p>;
+}
+
 /** Осталось до ТО — общий кусок для таблицы (десктоп) и карточки (мобильный). */
 function RemainingCell({ hasSchedule, info }: { hasSchedule: boolean | number | null | undefined; info: UpcomingService | undefined }) {
   if (!hasSchedule) return <span className="text-slate-400">интервал не задан</span>;
@@ -191,6 +204,7 @@ function UpcomingSection() {
               <tr key={truck.id}>
                 <td className="py-2 pr-4 align-top">
                   {truck.name} ({truck.plateNumber})
+                  <ServiceNoteLine note={truck.serviceNote} />
                 </td>
                 <td className="py-2 pr-4 align-top">
                   {truck.serviceIntervalKm ? `${fmt(truck.serviceIntervalKm)} км` : "—"}
@@ -229,9 +243,12 @@ function UpcomingSection() {
           return (
             <div key={truck.id} className="py-3 first:pt-0">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <p className="font-semibold text-slate-800">
-                  {truck.name} <span className="text-slate-400 font-normal">({truck.plateNumber})</span>
-                </p>
+                <div>
+                  <p className="font-semibold text-slate-800">
+                    {truck.name} <span className="text-slate-400 font-normal">({truck.plateNumber})</span>
+                  </p>
+                  <ServiceNoteLine note={truck.serviceNote} />
+                </div>
                 <button
                   onClick={() => toggleEdit(truck.id)}
                   className="text-sky-600 text-xs hover:underline shrink-0 whitespace-nowrap pt-0.5"

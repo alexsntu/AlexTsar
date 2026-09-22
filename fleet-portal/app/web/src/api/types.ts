@@ -29,6 +29,7 @@ export interface Truck {
   lastServiceOdometer: number | null;
   insuranceExpiryDate: string | null;
   inspectionExpiryDate: string | null;
+  serviceNote: string | null;
   isActive: boolean;
 }
 
