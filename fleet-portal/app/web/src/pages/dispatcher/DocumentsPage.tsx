@@ -261,6 +261,9 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
   // useApi держит прошлый ответ, пока грузится новый, — цифры другой машины
   // или другого месяца под новым заголовком не показываем.
   const report = loaded && loaded.yearMonth === month && loaded.truckPlate === plate ? loaded : null;
+  // Полный список рейсов на телефоне — десятки карточек подряд, поэтому там он
+  // свёрнут, пока не попросят; на широком экране это обычная таблица, открыта сразу.
+  const [tripsOpen, setTripsOpen] = useState(() => window.matchMedia("(min-width: 640px)").matches);
 
   return (
     <Card title={`Машина ${plate} за месяц`}>
@@ -332,8 +335,13 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
 
           {report.trips.length > 0 && (
             <>
-              <p className="text-sm font-semibold text-slate-600 mb-1">Все рейсы</p>
-              <div className="mb-4">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <p className="text-sm font-semibold text-slate-600">Все рейсы ({report.trips.length})</p>
+                <button onClick={() => setTripsOpen(!tripsOpen)} className="text-sky-600 text-xs hover:underline link-btn">
+                  {tripsOpen ? "Скрыть" : "Показать"}
+                </button>
+              </div>
+              <div className={tripsOpen ? "mb-4" : "hidden"}>
                 <Table stack head={["Дата", "Направление", "Адрес", "Км", "Кг", "₽/кг", "Сумма, ₽"]}>
                   {report.trips.map((t, i) => (
                     <tr key={i}>
@@ -373,7 +381,7 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
           {report.maintenance.lines.length > 0 && (
             <>
               <p className="text-sm font-semibold text-slate-600 mb-1">ТО и ремонт</p>
-              <Table head={["Дата", "Вид", "Описание", "Сумма, ₽"]}>
+              <Table stack head={["Дата", "Вид", "Описание", "Сумма, ₽"]}>
                 {report.maintenance.lines.map((m, i) => (
                   <tr key={i}>
                     <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(m.date)}</td>
@@ -407,7 +415,8 @@ function RouteSummarySection() {
               <td className="py-2 pr-4">{fmt(row.totalMassKg)}</td>
               <td className="py-2 pr-4">{fmt(row.totalDistanceKm)}</td>
               <td className="py-2 pr-4">{row.deliveryDates.length}</td>
-              <td className="py-2 pr-4 text-slate-500 text-xs">{row.deliveryDates.map((d) => formatShortDate(d)).join(", ")}</td>
+              {/* На телефоне список дат прячем — он раздувает карточку, а даты видны в «Подробно». */}
+              <td className="py-2 pr-4 text-slate-500 text-xs stack-hide">{row.deliveryDates.map((d) => formatShortDate(d)).join(", ")}</td>
               <td className="py-2 pr-4 text-right whitespace-nowrap">
                 <button
                   onClick={() => setSelectedPlate(selectedPlate === row.truckPlate ? null : row.truckPlate)}
