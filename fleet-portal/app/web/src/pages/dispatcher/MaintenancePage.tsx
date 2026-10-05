@@ -146,7 +146,7 @@ function LastServiceCell({ truck }: { truck: Truck }) {
     <button
       type="button"
       onClick={() => setShowDate((v) => !v)}
-      className="text-left hover:underline decoration-dotted underline-offset-2"
+      className="text-left hover:underline decoration-dotted underline-offset-2 tap-value"
       title={date ? "Нажмите, чтобы показать/скрыть дату ТО" : undefined}
     >
       {odometer != null ? `${fmt(odometer)} км` : "—"}
