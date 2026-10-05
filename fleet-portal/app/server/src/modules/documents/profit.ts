@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { round2 } from "../../lib/money.js";
 import { mskDayStart } from "../../lib/date.js";
-import { getMonthDeliveries, monthRange, totalCost } from "./queries.js";
+import { buildMonthSummary, getMonthDeliveries, monthRange, totalCost } from "./queries.js";
 import { buildRoyaltySummary, listRoyalties } from "./royalties.js";
 
 /** Налоги считаются как фиксированный процент от суммы услуг за месяц. */
@@ -93,7 +93,10 @@ export async function getProfitSummary(prisma: PrismaClient, yearMonth: string):
 
   return buildProfitSummary({
     yearMonth,
-    revenue: totalCost(deliveries),
+    // Доход — ровно сумма счёта за месяц (сумма его строк по тарифам, каждая
+    // уже округлена), а не сумма всех рейсов, округлённая один раз: эти два
+    // числа могут расходиться на копейку, а получаем мы именно по счёту.
+    revenue: totalCost(buildMonthSummary(deliveries)),
     fuelCost: sum(withdrawals.filter((w) => !w.isPersonal)),
     personalFuelCost: sum(withdrawals.filter((w) => w.isPersonal)),
     serviceCost: sum(maintenanceRecords.filter((r) => r.type === "SERVICE")),
