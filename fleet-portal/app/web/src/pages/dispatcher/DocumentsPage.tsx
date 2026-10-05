@@ -16,6 +16,7 @@ import type {
   RoyaltySummary,
   RoyaltyTruckBreakdown,
   RouteSummaryRow,
+  TruckReport,
 } from "../../api/types";
 import { Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
 import { formatShortDate, todayLocalDateString } from "../../lib/date";
@@ -242,32 +243,194 @@ function MonthPicker({ month, onChange }: { month: string; onChange: (v: string)
   );
 }
 
+function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+      <div className="text-xs font-medium text-slate-500">{label}</div>
+      <div className="text-base font-semibold text-slate-800 whitespace-nowrap">{value}</div>
+      {hint && <div className="text-xs text-slate-400">{hint}</div>}
+    </div>
+  );
+}
+
+/** Разрез одной машины за месяц: рейсы и суммы — из загруженных файлов
+ * заказчика (по госномеру), топливо и ТО/ремонты — из разделов «Топливо» и
+ * «ТО и ремонт» по машине из справочника с тем же госномером. */
+function TruckReportCard({ month, plate, plates, onSelect }: { month: string; plate: string; plates: string[]; onSelect: (plate: string) => void }) {
+  const { data: loaded, error } = useApi<TruckReport>(`/api/documents/truck-report?month=${month}&plate=${encodeURIComponent(plate)}`, [month, plate]);
+  // useApi держит прошлый ответ, пока грузится новый, — цифры другой машины
+  // или другого месяца под новым заголовком не показываем.
+  const report = loaded && loaded.yearMonth === month && loaded.truckPlate === plate ? loaded : null;
+
+  return (
+    <Card title={`Машина ${plate} за месяц`}>
+      <div className="w-56 mb-3">
+        <Field label="Машина">
+          <Select value={plate} onChange={(e) => onSelect(e.target.value)}>
+            {!plates.includes(plate) && <option value={plate}>{plate}</option>}
+            {plates.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      <ErrorText>{error}</ErrorText>
+      {report && (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+            <StatTile label="Рейсов" value={String(report.totals.trips)} hint={`дней с доставками: ${report.totals.days}`} />
+            <StatTile label="Стоимость перевозок" value={`${fmtMoney(report.totals.cost)} ₽`} />
+            <StatTile label="Перевезено" value={`${fmt(report.totals.massKg)} кг`} />
+            <StatTile label="Пройдено" value={`${fmt(report.totals.distanceKm)} км`} hint="по маршрутам из файлов заказчика" />
+            <StatTile label="Топливо" value={`${fmtMoney(report.fuel.cost)} ₽`} hint={`${fmt(report.fuel.liters)} л`} />
+            <StatTile
+              label="ТО и ремонт"
+              value={`${fmtMoney(report.maintenance.totalCost)} ₽`}
+              hint={`ТО ${fmtMoney(report.maintenance.serviceCost)} ₽ + ремонты ${fmtMoney(report.maintenance.repairCost)} ₽`}
+            />
+          </div>
+
+          {!report.truck && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+              В справочнике «Тягачи» нет машины с госномером {plate}, поэтому заправки и ТО/ремонты по ней не найдены. Проверьте
+              госномер в справочнике — он должен совпадать с написанием в файле заказчика.
+            </div>
+          )}
+
+          <p className="text-sm font-semibold text-slate-600 mb-1">По направлениям</p>
+          <div className="mb-4">
+            <Table head={["Направление", "Рейсов", "Кг", "Км", "Сумма, ₽"]}>
+              {report.directions.map((d) => (
+                <tr key={d.city}>
+                  <td className="py-1 pr-4">{d.city}</td>
+                  <td className="py-1 pr-4">{d.trips}</td>
+                  <td className="py-1 pr-4">{fmt(d.massKg)}</td>
+                  <td className="py-1 pr-4">{fmt(d.distanceKm)}</td>
+                  <td className="py-1 pr-4 whitespace-nowrap">{fmtMoney(d.cost)}</td>
+                </tr>
+              ))}
+              {report.directions.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-3 text-slate-400 text-sm">
+                    За этот месяц у машины нет рейсов
+                  </td>
+                </tr>
+              )}
+              {report.directions.length > 0 && (
+                <tr className="font-semibold">
+                  <td className="py-1 pr-4">Итого</td>
+                  <td className="py-1 pr-4">{report.totals.trips}</td>
+                  <td className="py-1 pr-4">{fmt(report.totals.massKg)}</td>
+                  <td className="py-1 pr-4">{fmt(report.totals.distanceKm)}</td>
+                  <td className="py-1 pr-4 whitespace-nowrap">{fmtMoney(report.totals.cost)}</td>
+                </tr>
+              )}
+            </Table>
+          </div>
+
+          {report.trips.length > 0 && (
+            <>
+              <p className="text-sm font-semibold text-slate-600 mb-1">Все рейсы</p>
+              <div className="mb-4">
+                <Table head={["Дата", "Направление", "Адрес", "Км", "Кг", "₽/кг", "Сумма, ₽"]}>
+                  {report.trips.map((t, i) => (
+                    <tr key={i}>
+                      <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(t.date)}</td>
+                      <td className="py-1 pr-4">{t.city}</td>
+                      <td className="py-1 pr-4">{t.addressText}</td>
+                      <td className="py-1 pr-4">{fmt(t.distanceKm)}</td>
+                      <td className="py-1 pr-4">{fmt(t.massKg)}</td>
+                      <td className="py-1 pr-4">{fmt(t.ratePerKg)}</td>
+                      <td className="py-1 pr-4 whitespace-nowrap">{fmtMoney(t.cost)}</td>
+                    </tr>
+                  ))}
+                </Table>
+              </div>
+            </>
+          )}
+
+          {report.fuel.lines.length > 0 && (
+            <>
+              <p className="text-sm font-semibold text-slate-600 mb-1">Заправки</p>
+              <div className="mb-4">
+                <Table head={["Дата", "Топливо", "Литров", "Сумма, ₽", "Одометр"]}>
+                  {report.fuel.lines.map((f, i) => (
+                    <tr key={i}>
+                      <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(f.date)}</td>
+                      <td className="py-1 pr-4">{f.fuelTypeName}</td>
+                      <td className="py-1 pr-4">{fmt(f.liters)}</td>
+                      <td className="py-1 pr-4 whitespace-nowrap">{fmtMoney(f.cost)}</td>
+                      <td className="py-1 pr-4">{f.odometer === null ? "—" : fmt(f.odometer)}</td>
+                    </tr>
+                  ))}
+                </Table>
+              </div>
+            </>
+          )}
+
+          {report.maintenance.lines.length > 0 && (
+            <>
+              <p className="text-sm font-semibold text-slate-600 mb-1">ТО и ремонт</p>
+              <Table head={["Дата", "Вид", "Описание", "Сумма, ₽"]}>
+                {report.maintenance.lines.map((m, i) => (
+                  <tr key={i}>
+                    <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(m.date)}</td>
+                    <td className="py-1 pr-4">{m.type === "SERVICE" ? "ТО" : "Ремонт"}</td>
+                    <td className="py-1 pr-4">{m.description ?? "—"}</td>
+                    <td className="py-1 pr-4 whitespace-nowrap">{fmtMoney(m.cost)}</td>
+                  </tr>
+                ))}
+              </Table>
+            </>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
 function RouteSummarySection() {
   const [month, setMonth] = useState(() => currentYearMonth());
   const { data } = useApi<RouteSummaryRow[]>(`/api/documents/route-summary?month=${month}`, [month]);
+  const [selectedPlate, setSelectedPlate] = useState<string | null>(null);
 
   return (
-    <Card title="Итоги маршрутов">
-      <MonthPicker month={month} onChange={setMonth} />
-      <Table head={["Машина", "Перевезено, кг", "Пройдено, км", "Дней с доставками", "Даты"]}>
-        {(data ?? []).map((row) => (
-          <tr key={row.truckPlate}>
-            <td className="py-2 pr-4">{row.truckPlate}</td>
-            <td className="py-2 pr-4">{fmt(row.totalMassKg)}</td>
-            <td className="py-2 pr-4">{fmt(row.totalDistanceKm)}</td>
-            <td className="py-2 pr-4">{row.deliveryDates.length}</td>
-            <td className="py-2 pr-4 text-slate-500 text-xs">{row.deliveryDates.map((d) => formatShortDate(d)).join(", ")}</td>
-          </tr>
-        ))}
-        {(data ?? []).length === 0 && (
-          <tr>
-            <td colSpan={5} className="py-3 text-slate-400 text-sm">
-              За этот месяц данных нет
-            </td>
-          </tr>
-        )}
-      </Table>
-    </Card>
+    <div>
+      <Card title="Итоги маршрутов">
+        <MonthPicker month={month} onChange={setMonth} />
+        <Table head={["Машина", "Перевезено, кг", "Пройдено, км", "Дней с доставками", "Даты", ""]}>
+          {(data ?? []).map((row) => (
+            <tr key={row.truckPlate} className={selectedPlate === row.truckPlate ? "bg-sky-50" : undefined}>
+              <td className="py-2 pr-4">{row.truckPlate}</td>
+              <td className="py-2 pr-4">{fmt(row.totalMassKg)}</td>
+              <td className="py-2 pr-4">{fmt(row.totalDistanceKm)}</td>
+              <td className="py-2 pr-4">{row.deliveryDates.length}</td>
+              <td className="py-2 pr-4 text-slate-500 text-xs">{row.deliveryDates.map((d) => formatShortDate(d)).join(", ")}</td>
+              <td className="py-2 pr-4 text-right whitespace-nowrap">
+                <button
+                  onClick={() => setSelectedPlate(selectedPlate === row.truckPlate ? null : row.truckPlate)}
+                  className="text-sky-600 text-xs hover:underline"
+                >
+                  {selectedPlate === row.truckPlate ? "Скрыть" : "Подробно"}
+                </button>
+              </td>
+            </tr>
+          ))}
+          {(data ?? []).length === 0 && (
+            <tr>
+              <td colSpan={6} className="py-3 text-slate-400 text-sm">
+                За этот месяц данных нет
+              </td>
+            </tr>
+          )}
+        </Table>
+      </Card>
+      {selectedPlate && (
+        <TruckReportCard month={month} plate={selectedPlate} plates={(data ?? []).map((r) => r.truckPlate)} onSelect={setSelectedPlate} />
+      )}
+    </div>
   );
 }
 

@@ -8,6 +8,7 @@ import type { ValidatedRow } from "./types.js";
 import { buildDayActs, buildMonthSummary, buildRouteSummary, getMonthDeliveries } from "./queries.js";
 import { buildRoyaltySummary, listKnownTruckPlates, listRoyalties, toRoyaltyConditionConfig, toRoyaltyConfig } from "./royalties.js";
 import { getProfitSummary } from "./profit.js";
+import { getTruckReport } from "./truckReport.js";
 import { buildDayActWorkbook, buildFinalActWorkbook, buildInvoiceWorkbook, buildMonthActsWorkbook, buildRegistryWorkbook, type OrgContext } from "./xlsx.js";
 import { writeDocumentWorkbook } from "./layout.js";
 
@@ -409,6 +410,14 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
     if (!parsed.success) return reply.code(400).send({ error: "invalid_query" });
     const deliveries = await getMonthDeliveries(fastify.prisma, parsed.data.month);
     return buildMonthSummary(deliveries);
+  });
+
+  // Разрез одной машины за месяц: её рейсы, итоги по направлениям, топливо и
+  // ТО/ремонты (см. truckReport.ts).
+  fastify.get("/api/documents/truck-report", readGuard, async (request, reply) => {
+    const parsed = z.object({ month: strictYearMonth, plate: z.string().min(1).max(50) }).safeParse(request.query);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_query" });
+    return getTruckReport(fastify.prisma, parsed.data.month, parsed.data.plate);
   });
 
   // ---------- Роялти ----------

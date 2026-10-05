@@ -368,3 +368,20 @@ export interface ProfitSummary {
   profit: number | null;
   details: { serviceCost: number; repairCost: number; personalFuelCost: number };
 }
+
+export interface TruckReport {
+  yearMonth: string;
+  truckPlate: string;
+  /** null — в справочнике нет машины с таким госномером, топливо и ТО не привязаны. */
+  truck: { id: number; name: string } | null;
+  trips: { date: string; city: string; addressText: string; distanceKm: number; massKg: number; ratePerKg: number; cost: number }[];
+  directions: { city: string; trips: number; massKg: number; distanceKm: number; cost: number }[];
+  totals: { trips: number; days: number; massKg: number; distanceKm: number; cost: number };
+  fuel: { liters: number; cost: number; lines: { date: string; fuelTypeName: string; liters: number; cost: number; odometer: number | null }[] };
+  maintenance: {
+    serviceCost: number;
+    repairCost: number;
+    totalCost: number;
+    lines: { date: string; type: string; description: string | null; cost: number }[];
+  };
+}

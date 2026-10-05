@@ -74,7 +74,7 @@ export function buildProfitSummary(input: ProfitInputs): ProfitSummary {
 /** Заправки и ТО/ремонты — реальные метки времени, поэтому границы месяца
  * для них московские (как в отчётах этих разделов), в отличие от Delivery,
  * где даты календарные и границы в UTC (см. monthRange в queries.ts). */
-function mskMonthRange(yearMonth: string): { start: Date; end: Date } {
+export function mskMonthRange(yearMonth: string): { start: Date; end: Date } {
   const { start, end } = monthRange(yearMonth);
   return { start: mskDayStart(start)!, end: mskDayStart(end)! };
 }
