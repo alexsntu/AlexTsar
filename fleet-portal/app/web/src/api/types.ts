@@ -353,3 +353,18 @@ export interface MonthClosing {
   finalActNumber: number;
   finalActDate: string;
 }
+
+export interface ProfitSummary {
+  yearMonth: string;
+  revenue: number;
+  taxPercent: number;
+  taxes: number;
+  fuel: number;
+  maintenance: number;
+  royalties: number;
+  /** null — ЗП за этот месяц ещё не введена, итог не считается. */
+  salary: number | null;
+  totalExpenses: number | null;
+  profit: number | null;
+  details: { serviceCost: number; repairCost: number; personalFuelCost: number };
+}

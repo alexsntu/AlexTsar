@@ -325,3 +325,16 @@ model MonthClosing {
   createdBy      Int
   createdAt      DateTime @default(now())
 }
+
+// ЗП сотрудников за месяц — единственная статья расходов во вкладке
+// "Прибыль", которую нельзя вывести из остальных данных: вводится вручную,
+// одна сумма на месяц. Пока строки за месяц нет — прибыль за него не
+// считается (см. modules/documents/profit.ts).
+model MonthPayroll {
+  id        Int      @id @default(autoincrement())
+  yearMonth String   @unique
+  amount    Float
+  updatedBy Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

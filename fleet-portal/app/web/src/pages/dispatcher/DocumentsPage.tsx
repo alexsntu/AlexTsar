@@ -8,6 +8,7 @@ import type {
   ImportResult,
   MonthClosing,
   MonthSummaryLine,
+  ProfitSummary,
   Royalty,
   RoyaltyCondition,
   RoyaltyConditionResult,
@@ -19,7 +20,7 @@ import type {
 import { Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
 import { formatShortDate, todayLocalDateString } from "../../lib/date";
 
-const TABS = ["Импорт", "Итоги маршрутов", "Роялти", "Журнал"] as const;
+const TABS = ["Импорт", "Итоги маршрутов", "Роялти", "Журнал", "Прибыль"] as const;
 type Tab = (typeof TABS)[number];
 
 function fmt(n: number): string {
@@ -820,12 +821,146 @@ function JournalSection() {
   );
 }
 
+/** Ввод ЗП сотрудников за месяц — единственная статья во вкладке «Прибыль»,
+ * которая вводится руками. Родитель задаёт key по месяцу и сохранённой сумме,
+ * поэтому поле само сбрасывается при смене месяца, отдельный эффект не нужен. */
+function SalaryForm({ month, saved, onSaved }: { month: string; saved: number | null; onSaved: (summary: ProfitSummary) => void }) {
+  const [amount, setAmount] = useState(saved === null ? "" : String(saved));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const dirty = amount !== "" && Number(amount) !== saved;
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      onSaved(await api.put<ProfitSummary>(`/api/documents/payroll/${month}`, { amount: Number(amount) }));
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 items-end flex-wrap mb-4">
+      <div className="w-56">
+        <Field label="ЗП сотрудников за месяц, ₽">
+          <Input type="number" min="0" step="0.01" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+        </Field>
+      </div>
+      <Button type="submit" disabled={!dirty || saving}>
+        {saving ? "Сохраняем…" : saved === null ? "Сохранить и рассчитать" : "Изменить"}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </form>
+  );
+}
+
+function ProfitRow({ label, hint, amount }: { label: string; hint?: string; amount: number | null }) {
+  return (
+    <tr>
+      <td className="py-2 pr-4">
+        {label}
+        {hint && <div className="text-xs text-slate-400">{hint}</div>}
+      </td>
+      <td className="py-2 text-right whitespace-nowrap">{amount === null ? <span className="text-amber-700">не введена</span> : `− ${fmtMoney(amount)}`}</td>
+    </tr>
+  );
+}
+
+function ProfitSection() {
+  const [month, setMonth] = useState(() => currentYearMonth());
+  const { data: loaded, error } = useApi<ProfitSummary>(`/api/documents/profit?month=${month}`, [month]);
+  // Ответ на сохранение ЗП уже содержит пересчитанный итог — показываем его
+  // сразу, без повторного запроса.
+  const [afterSave, setAfterSave] = useState<ProfitSummary | null>(null);
+  const fresh = afterSave ?? loaded;
+  // useApi держит данные прошлого месяца, пока грузится новый, — чужие цифры
+  // под новым месяцем не показываем.
+  const summary = fresh?.yearMonth === month ? fresh : null;
+
+  return (
+    <Card title="Прибыль за месяц">
+      <MonthPicker
+        month={month}
+        onChange={(m) => {
+          setAfterSave(null);
+          setMonth(m);
+        }}
+      />
+      <ErrorText>{error}</ErrorText>
+      {summary && (
+        <>
+          <SalaryForm key={`${month}:${summary.salary}`} month={month} saved={summary.salary} onSaved={setAfterSave} />
+
+          {summary.revenue === 0 && <p className="text-slate-400 text-sm mb-3">За этот месяц ещё нет загруженных рейсов — доход равен нулю.</p>}
+
+          <div className="max-w-xl">
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-slate-100">
+                <tr>
+                  <td className="py-2 pr-4 font-semibold text-slate-800">
+                    Доход
+                    <div className="text-xs font-normal text-slate-400">сумма услуг перевозки за месяц</div>
+                  </td>
+                  <td className="py-2 text-right whitespace-nowrap font-semibold text-slate-800">{fmtMoney(summary.revenue)}</td>
+                </tr>
+                <ProfitRow label="Налоги" hint={`${fmt(summary.taxPercent)}% от суммы услуг`} amount={summary.taxes} />
+                <ProfitRow
+                  label="ГСМ"
+                  hint={
+                    summary.details.personalFuelCost > 0
+                      ? `заправки машин предприятия; личные заправки на ${fmtMoney(summary.details.personalFuelCost)} ₽ не включены`
+                      : "заправки машин предприятия"
+                  }
+                  amount={summary.fuel}
+                />
+                <ProfitRow
+                  label="Ремонты и ТО"
+                  hint={`ТО ${fmtMoney(summary.details.serviceCost)} ₽ + ремонты ${fmtMoney(summary.details.repairCost)} ₽`}
+                  amount={summary.maintenance}
+                />
+                <ProfitRow label="Роялти" hint="общий итог по всем роялти" amount={summary.royalties} />
+                <ProfitRow label="ЗП сотрудников" hint="вводится вручную" amount={summary.salary} />
+                {summary.totalExpenses !== null && (
+                  <tr>
+                    <td className="py-2 pr-4 text-slate-500">Всего расходов</td>
+                    <td className="py-2 text-right whitespace-nowrap text-slate-500">− {fmtMoney(summary.totalExpenses)}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            {summary.profit === null ? (
+              <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                Прибыль не рассчитана: введите ЗП сотрудников за этот месяц (если ЗП не было — введите 0).
+              </div>
+            ) : (
+              <div
+                className={`mt-3 p-3 rounded-lg border-2 flex items-center justify-between gap-2 flex-wrap ${
+                  summary.profit < 0 ? "bg-red-50 border-red-300 text-red-800" : "bg-emerald-50 border-emerald-300 text-emerald-800"
+                }`}
+              >
+                <span className="font-semibold">{summary.profit < 0 ? "Убыток" : "Прибыль"}</span>
+                <span className="text-lg font-bold whitespace-nowrap">{fmtMoney(summary.profit)} ₽</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </Card>
+  );
+}
+
 export function DocumentsPage() {
   const [tab, setTab] = useState<Tab>("Импорт");
 
   return (
     <div>
-      <div className="flex gap-1 mb-4">
+      <div className="flex gap-1 mb-4 flex-wrap">
         {TABS.map((t) => (
           <button
             key={t}
@@ -840,6 +975,7 @@ export function DocumentsPage() {
       {tab === "Итоги маршрутов" && <RouteSummarySection />}
       {tab === "Роялти" && <RoyaltiesSection />}
       {tab === "Журнал" && <JournalSection />}
+      {tab === "Прибыль" && <ProfitSection />}
     </div>
   );
 }

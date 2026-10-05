@@ -7,6 +7,7 @@ import { validateRows } from "./validate.js";
 import type { ValidatedRow } from "./types.js";
 import { buildDayActs, buildMonthSummary, buildRouteSummary, getMonthDeliveries } from "./queries.js";
 import { buildRoyaltySummary, listKnownTruckPlates, listRoyalties, toRoyaltyConditionConfig, toRoyaltyConfig } from "./royalties.js";
+import { getProfitSummary } from "./profit.js";
 import { buildDayActWorkbook, buildFinalActWorkbook, buildInvoiceWorkbook, buildMonthActsWorkbook, buildRegistryWorkbook, type OrgContext } from "./xlsx.js";
 import { writeDocumentWorkbook } from "./layout.js";
 
@@ -46,6 +47,12 @@ const monthClosingSchema = z.object({
 });
 
 const monthQuerySchema = z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) });
+
+// Строже, чем monthQuerySchema: сюда пишет пользователь (ЗП за месяц), и
+// "2026-13" не должен превращаться в строку БД за несуществующий месяц.
+const strictYearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+
+const payrollSchema = z.object({ amount: z.number().min(0).max(1_000_000_000) });
 
 const royaltySchema = z.object({
   name: z.string().min(1).max(100),
@@ -484,6 +491,27 @@ export default async function documentsRoutes(fastify: FastifyInstance) {
       listRoyalties(fastify.prisma),
     ]);
     return buildRoyaltySummary(deliveries, royalties);
+  });
+
+  // ---------- Прибыль ----------
+  fastify.get("/api/documents/profit", readGuard, async (request, reply) => {
+    const parsed = z.object({ month: strictYearMonth }).safeParse(request.query);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_query" });
+    return getProfitSummary(fastify.prisma, parsed.data.month);
+  });
+
+  // ЗП сотрудников за месяц — вводится вручную, одна сумма на месяц.
+  // Возвращаем сразу пересчитанный итог, чтобы UI не делал второй запрос.
+  fastify.put<{ Params: { yearMonth: string } }>("/api/documents/payroll/:yearMonth", writeGuard, async (request, reply) => {
+    const yearMonth = strictYearMonth.safeParse(request.params.yearMonth);
+    const parsed = payrollSchema.safeParse(request.body);
+    if (!yearMonth.success || !parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    await fastify.prisma.monthPayroll.upsert({
+      where: { yearMonth: yearMonth.data },
+      create: { yearMonth: yearMonth.data, amount: round2(parsed.data.amount), updatedBy: request.user!.id },
+      update: { amount: round2(parsed.data.amount), updatedBy: request.user!.id },
+    });
+    return getProfitSummary(fastify.prisma, yearMonth.data);
   });
 
   // ---------- Закрытие месяца ----------
