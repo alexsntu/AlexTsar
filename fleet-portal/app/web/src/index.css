@@ -8,3 +8,68 @@ body {
   background-color: #f8fafc;
   color: #0f172a;
 }
+
+/* Телефон: таблицы с <Table stack> — карточками, без прокрутки вбок.
+   Подпись слева берётся из data-label (ставит labelCells в ui.tsx). */
+@media (max-width: 639px) {
+  table.stack-table,
+  table.stack-table tbody {
+    display: block;
+  }
+  table.stack-table thead {
+    display: none;
+  }
+  table.stack-table tr {
+    display: block;
+    padding: 0.5rem 0;
+  }
+  table.stack-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.2rem 0;
+    max-width: none;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  table.stack-table td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-width: 45%;
+    text-align: left;
+    font-size: 0.75rem;
+    color: #64748b;
+    overflow-wrap: normal;
+  }
+  table.stack-table td[data-label]:first-child {
+    font-weight: 600;
+  }
+  /* Ячейка с действиями (колонка без заголовка) — кнопки в ряд справа. */
+  table.stack-table td:not([data-label]):not([colspan]) {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  table.stack-table td:not([data-label]):not([colspan]):empty {
+    display: none;
+  }
+  /* Первая колонка без заголовка — это название строки, а не действия. */
+  table.stack-table td:not([data-label]):not([colspan]):first-child {
+    justify-content: flex-start;
+    font-weight: 600;
+    text-align: left;
+  }
+  table.stack-table td[colspan] {
+    display: block;
+    text-align: left;
+  }
+
+  /* Кнопки-ссылки («Скачать», «Убрать», «Подробно»…) — под палец. */
+  .link-btn {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding: 0.625rem 0.25rem;
+  }
+}

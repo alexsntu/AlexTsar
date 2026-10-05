@@ -107,7 +107,7 @@ export function TripsPage() {
       </Card>
 
       <Card title="Все рейсы">
-        <Table head={["Дата", "Водитель", "Машина", "Маршрут", "Груз", "Статус", ""]}>
+        <Table stack head={["Дата", "Водитель", "Машина", "Маршрут", "Груз", "Статус", ""]}>
           {(trips ?? []).map((trip) => (
             <tr key={trip.id}>
               <td className="py-2 pr-4">{formatShortDate(trip.date)}</td>
@@ -125,10 +125,10 @@ export function TripsPage() {
               <td className="py-2 pr-4 text-right whitespace-nowrap">
                 {trip.status !== "DONE" && trip.status !== "CANCELLED" && (
                   <>
-                    <button onClick={() => void setStatus(trip.id, "DONE")} className="text-emerald-600 text-xs hover:underline mr-2">
+                    <button onClick={() => void setStatus(trip.id, "DONE")} className="text-emerald-600 text-xs hover:underline link-btn mr-2">
                       Завершить
                     </button>
-                    <button onClick={() => void setStatus(trip.id, "CANCELLED")} className="text-red-600 text-xs hover:underline">
+                    <button onClick={() => void setStatus(trip.id, "CANCELLED")} className="text-red-600 text-xs hover:underline link-btn">
                       Отменить
                     </button>
                   </>

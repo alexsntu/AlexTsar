@@ -176,7 +176,7 @@ function ImportSection() {
       </Card>
 
       <Card title="Загруженные периоды">
-        <Table head={["Период", "Файл", "Загружен", "Рейсов", "Масса, кг", "Сумма, ₽", ""]}>
+        <Table stack head={["Период", "Файл", "Загружен", "Рейсов", "Масса, кг", "Сумма, ₽", ""]}>
           {(batches ?? []).map((b) => (
             <Fragment key={b.id}>
               <tr>
@@ -193,17 +193,17 @@ function ImportSection() {
                 <td className="py-2 pr-4">{fmtMoney(b.totalCost)}</td>
                 <td className="py-2 pr-4 text-right whitespace-nowrap">
                   {b.hasFile && (
-                    <button onClick={() => void downloadOriginal(b)} className="text-sky-600 text-xs hover:underline mr-3">
+                    <button onClick={() => void downloadOriginal(b)} className="text-sky-600 text-xs hover:underline link-btn mr-3">
                       Скачать
                     </button>
                   )}
                   <button
                     onClick={() => setReplacingId(replacingId === b.id ? null : b.id)}
-                    className="text-sky-600 text-xs hover:underline mr-3"
+                    className="text-sky-600 text-xs hover:underline link-btn mr-3"
                   >
                     {replacingId === b.id ? "Отмена" : "Заменить файл"}
                   </button>
-                  <button onClick={() => void deleteBatch(b.id)} className="text-red-600 text-xs hover:underline">
+                  <button onClick={() => void deleteBatch(b.id)} className="text-red-600 text-xs hover:underline link-btn">
                     Убрать
                   </button>
                 </td>
@@ -301,7 +301,7 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
 
           <p className="text-sm font-semibold text-slate-600 mb-1">По направлениям</p>
           <div className="mb-4">
-            <Table head={["Направление", "Рейсов", "Кг", "Км", "Сумма, ₽"]}>
+            <Table stack head={["Направление", "Рейсов", "Кг", "Км", "Сумма, ₽"]}>
               {report.directions.map((d) => (
                 <tr key={d.city}>
                   <td className="py-1 pr-4">{d.city}</td>
@@ -334,7 +334,7 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
             <>
               <p className="text-sm font-semibold text-slate-600 mb-1">Все рейсы</p>
               <div className="mb-4">
-                <Table head={["Дата", "Направление", "Адрес", "Км", "Кг", "₽/кг", "Сумма, ₽"]}>
+                <Table stack head={["Дата", "Направление", "Адрес", "Км", "Кг", "₽/кг", "Сумма, ₽"]}>
                   {report.trips.map((t, i) => (
                     <tr key={i}>
                       <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(t.date)}</td>
@@ -355,7 +355,7 @@ function TruckReportCard({ month, plate, plates, onSelect }: { month: string; pl
             <>
               <p className="text-sm font-semibold text-slate-600 mb-1">Заправки</p>
               <div className="mb-4">
-                <Table head={["Дата", "Топливо", "Литров", "Сумма, ₽", "Одометр"]}>
+                <Table stack head={["Дата", "Топливо", "Литров", "Сумма, ₽", "Одометр"]}>
                   {report.fuel.lines.map((f, i) => (
                     <tr key={i}>
                       <td className="py-1 pr-4 whitespace-nowrap">{formatShortDate(f.date)}</td>
@@ -400,7 +400,7 @@ function RouteSummarySection() {
     <div>
       <Card title="Итоги маршрутов">
         <MonthPicker month={month} onChange={setMonth} />
-        <Table head={["Машина", "Перевезено, кг", "Пройдено, км", "Дней с доставками", "Даты", ""]}>
+        <Table stack head={["Машина", "Перевезено, кг", "Пройдено, км", "Дней с доставками", "Даты", ""]}>
           {(data ?? []).map((row) => (
             <tr key={row.truckPlate} className={selectedPlate === row.truckPlate ? "bg-sky-50" : undefined}>
               <td className="py-2 pr-4">{row.truckPlate}</td>
@@ -411,7 +411,7 @@ function RouteSummarySection() {
               <td className="py-2 pr-4 text-right whitespace-nowrap">
                 <button
                   onClick={() => setSelectedPlate(selectedPlate === row.truckPlate ? null : row.truckPlate)}
-                  className="text-sky-600 text-xs hover:underline"
+                  className="text-sky-600 text-xs hover:underline link-btn"
                 >
                   {selectedPlate === row.truckPlate ? "Скрыть" : "Подробно"}
                 </button>
@@ -702,7 +702,7 @@ function RoyaltyConditionCard({ condition }: { condition: RoyaltyConditionResult
             </span>
             <button
               onClick={() => setExpandedTruck(expandedTruck === t.truckPlate ? null : t.truckPlate)}
-              className="text-sky-600 text-xs hover:underline"
+              className="text-sky-600 text-xs hover:underline link-btn"
             >
               {expandedTruck === t.truckPlate ? "Скрыть" : "Расшифровка"}
             </button>
@@ -891,12 +891,12 @@ function JournalSection() {
                   Акт №{act.actNumber} от {formatShortDate(act.date)} — <span className="font-medium">{fmtMoney(act.totalCost)} ₽</span>
                 </span>
                 <div className="flex gap-3">
-                  <button onClick={() => setExpanded(expanded === act.date ? null : act.date)} className="text-sky-600 text-xs hover:underline">
+                  <button onClick={() => setExpanded(expanded === act.date ? null : act.date)} className="text-sky-600 text-xs hover:underline link-btn">
                     {expanded === act.date ? "Скрыть" : "Просмотреть"}
                   </button>
                   <button
                     onClick={() => void download(`/api/documents/day-acts/${act.date}/download`, `Акт №${act.actNumber} от ${act.date}.xlsx`)}
-                    className="text-sky-600 text-xs hover:underline"
+                    className="text-sky-600 text-xs hover:underline link-btn"
                   >
                     Скачать .xlsx
                   </button>
@@ -908,7 +908,7 @@ function JournalSection() {
           <div className="pt-2">
             <button
               onClick={() => void download(`/api/documents/day-acts/month/${month}/download`, `Акты за ${month}.xlsx`)}
-              className="text-sky-600 text-xs hover:underline"
+              className="text-sky-600 text-xs hover:underline link-btn"
             >
               Скачать все акты за месяц одним файлом (вкладки по дням)
             </button>
@@ -934,7 +934,7 @@ function JournalSection() {
               <span className="text-sm">Реестр документов за {month}</span>
               <button
                 onClick={() => void download(`/api/documents/registry/${month}/download`, `Реестр ${month}.xlsx`)}
-                className="text-sky-600 text-xs hover:underline"
+                className="text-sky-600 text-xs hover:underline link-btn"
               >
                 Скачать .xlsx
               </button>
@@ -946,12 +946,12 @@ function JournalSection() {
                 Итоговый акт №{closing.finalActNumber} от {formatShortDate(closing.finalActDate)}
               </span>
               <div className="flex gap-3">
-                <button onClick={() => setExpanded(expanded === "final-act" ? null : "final-act")} className="text-sky-600 text-xs hover:underline">
+                <button onClick={() => setExpanded(expanded === "final-act" ? null : "final-act")} className="text-sky-600 text-xs hover:underline link-btn">
                   {expanded === "final-act" ? "Скрыть" : "Просмотреть"}
                 </button>
                 <button
                   onClick={() => void download(`/api/documents/final-act/${month}/download`, `Акт №${closing.finalActNumber} ${month}.xlsx`)}
-                  className="text-sky-600 text-xs hover:underline"
+                  className="text-sky-600 text-xs hover:underline link-btn"
                 >
                   Скачать .xlsx
                 </button>
@@ -965,12 +965,12 @@ function JournalSection() {
                 Счёт №{closing.invoiceNumber} от {formatShortDate(closing.invoiceDate)}
               </span>
               <div className="flex gap-3">
-                <button onClick={() => setExpanded(expanded === "invoice" ? null : "invoice")} className="text-sky-600 text-xs hover:underline">
+                <button onClick={() => setExpanded(expanded === "invoice" ? null : "invoice")} className="text-sky-600 text-xs hover:underline link-btn">
                   {expanded === "invoice" ? "Скрыть" : "Просмотреть"}
                 </button>
                 <button
                   onClick={() => void download(`/api/documents/invoice/${month}/download`, `Счёт №${closing.invoiceNumber} ${month}.xlsx`)}
-                  className="text-sky-600 text-xs hover:underline"
+                  className="text-sky-600 text-xs hover:underline link-btn"
                 >
                   Скачать .xlsx
                 </button>

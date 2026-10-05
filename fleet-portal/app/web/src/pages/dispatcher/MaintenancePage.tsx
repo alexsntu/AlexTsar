@@ -224,7 +224,7 @@ function UpcomingSection() {
                   <ExpiryCell dateStr={truck.inspectionExpiryDate} warningLabel="Пройдите техосмотр" />
                 </td>
                 <td className="py-2 pr-4 align-top text-right">
-                  <button onClick={() => toggleEdit(truck.id)} className="text-sky-600 text-xs hover:underline">
+                  <button onClick={() => toggleEdit(truck.id)} className="text-sky-600 text-xs hover:underline link-btn">
                     Настроить
                   </button>
                   {editingTruckId === truck.id && <ScheduleForm truck={truck} onDone={onFormDone} />}
@@ -251,7 +251,7 @@ function UpcomingSection() {
                 </div>
                 <button
                   onClick={() => toggleEdit(truck.id)}
-                  className="text-sky-600 text-xs hover:underline shrink-0 whitespace-nowrap pt-0.5"
+                  className="text-sky-600 text-xs hover:underline link-btn shrink-0 whitespace-nowrap pt-0.5"
                 >
                   Настроить
                 </button>
@@ -517,13 +517,13 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
               />
             </div>
             {parts.length > 1 && (
-              <button type="button" onClick={() => removePartRow(i)} className="text-red-600 text-xs hover:underline">
+              <button type="button" onClick={() => removePartRow(i)} className="text-red-600 text-xs hover:underline link-btn">
                 Убрать
               </button>
             )}
           </div>
         ))}
-        <button type="button" onClick={addPartRow} className="text-sky-600 text-xs hover:underline mb-3">
+        <button type="button" onClick={addPartRow} className="text-sky-600 text-xs hover:underline link-btn mb-3">
           + добавить запчасть
         </button>
 
@@ -583,14 +583,14 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
                 setFilterFrom("");
                 setFilterTo("");
               }}
-              className="text-sky-600 text-xs hover:underline"
+              className="text-sky-600 text-xs hover:underline link-btn"
             >
               Сбросить фильтр
             </button>
           )}
         </div>
 
-        <Table head={["Дата", "Машина", "Тип", "Пробег", "Описание", "Запчасти", "Сумма", ""]}>
+        <Table stack head={["Дата", "Машина", "Тип", "Пробег", "Описание", "Запчасти", "Сумма", ""]}>
           {(records ?? []).map((r) => (
             <tr
               key={r.id}
@@ -615,7 +615,7 @@ function JournalSection({ initialFilter }: { initialFilter: JournalFilter | null
                     e.stopPropagation();
                     void handleDelete(r);
                   }}
-                  className="text-red-600 text-xs hover:underline"
+                  className="text-red-600 text-xs hover:underline link-btn"
                 >
                   Удалить
                 </button>

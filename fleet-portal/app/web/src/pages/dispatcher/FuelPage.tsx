@@ -140,7 +140,7 @@ function LotsSection() {
           <Button type="submit">Добавить приход</Button>
         </form>
         <ErrorText>{error}</ErrorText>
-        <Table head={["Дата", "Вид топлива", "Приход, л", "Цена/л", "Сумма", "Остаток, л"]}>
+        <Table stack head={["Дата", "Вид топлива", "Приход, л", "Цена/л", "Сумма", "Остаток, л"]}>
           {(lots ?? []).map((lot) => (
             <tr key={lot.id}>
               <td className="py-2 pr-4">{formatShortDate(lot.date)}</td>
@@ -414,7 +414,7 @@ function InOutDashboard() {
       <ErrorText>{error}</ErrorText>
       {(inflow || outflow) && (
         <>
-          <Table head={["Вид топлива", "Пришло, л", "Пришло, ₽", "Ушло, л", "Ушло, ₽"]}>
+          <Table stack head={["Вид топлива", "Пришло, л", "Пришло, ₽", "Ушло, л", "Ушло, ₽"]}>
             {combinedRows.map((r) => (
               <tr key={r.fuelTypeId}>
                 <td className="py-2 pr-4">{r.name}</td>
@@ -627,7 +627,7 @@ function WithdrawalsSection() {
           </Button>
         )}
       </div>
-      <Table head={["Дата", "Вид топлива", "Литры", "Сумма", "Получатель"]}>
+      <Table stack head={["Дата", "Вид топлива", "Литры", "Сумма", "Получатель"]}>
         {(withdrawals ?? []).map((w) => (
           <tr key={w.id}>
             <td className="py-2 pr-4">{formatShortDate(w.date)}</td>
@@ -731,7 +731,7 @@ function ReportsSection() {
         <ErrorText>{error}</ErrorText>
         {consumption && (
           <>
-            <Table head={["", "Расход предприятия, л", "Расход предприятия, ₽", "Личное, л", "Личное, ₽"]}>
+            <Table stack head={["", "Расход предприятия, л", "Расход предприятия, ₽", "Личное, л", "Личное, ₽"]}>
               {consumption.rows.map((row) => (
                 <tr key={String(row.key)}>
                   <td className="py-2 pr-4">{row.label}</td>

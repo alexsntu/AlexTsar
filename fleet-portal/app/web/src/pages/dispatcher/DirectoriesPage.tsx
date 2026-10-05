@@ -77,7 +77,7 @@ function TrucksSection() {
         <Button type="submit">Добавить</Button>
       </form>
       <ErrorText>{error}</ErrorText>
-      <Table head={["Модель", "Госномер", "Грузопод., т", "Норма л/100км", ""]}>
+      <Table stack head={["Модель", "Госномер", "Грузопод., т", "Норма л/100км", ""]}>
         {(data ?? []).map((truck) => (
           <tr key={truck.id}>
             <td className="py-2 pr-4">{truck.name}</td>
@@ -89,7 +89,7 @@ function TrucksSection() {
                 : "—"}
             </td>
             <td className="py-2 pr-4 text-right">
-              <button onClick={() => void deactivate(truck.id)} className="text-red-600 text-xs hover:underline">
+              <button onClick={() => void deactivate(truck.id)} className="text-red-600 text-xs hover:underline link-btn">
                 Убрать
               </button>
             </td>
@@ -192,7 +192,7 @@ function DriversSection() {
         <Button type="submit">Добавить</Button>
       </form>
       <ErrorText>{error}</ErrorText>
-      <Table head={["ФИО", "Телефон", "Логин в приложении", ""]}>
+      <Table stack head={["ФИО", "Телефон", "Логин в приложении", ""]}>
         {(data ?? []).map((driver) => (
           <tr key={driver.id}>
             <td className="py-2 pr-4 align-top">{driver.fullName}</td>
@@ -206,11 +206,11 @@ function DriversSection() {
             <td className="py-2 pr-4 text-right align-top whitespace-nowrap">
               <button
                 onClick={() => setEditingLoginFor(editingLoginFor === driver.id ? null : driver.id)}
-                className="text-sky-600 text-xs hover:underline mr-3"
+                className="text-sky-600 text-xs hover:underline link-btn mr-3"
               >
                 {driver.loginEmail ? "Сменить пароль" : "Завести логин"}
               </button>
-              <button onClick={() => void deactivate(driver.id)} className="text-red-600 text-xs hover:underline">
+              <button onClick={() => void deactivate(driver.id)} className="text-red-600 text-xs hover:underline link-btn">
                 Убрать
               </button>
             </td>
@@ -258,7 +258,7 @@ function FuelTypesSection() {
         {(data ?? []).map((fuelType) => (
           <div key={fuelType.id} className="flex items-center gap-2">
             <Badge>{fuelType.name}</Badge>
-            <button onClick={() => void deactivate(fuelType.id)} className="text-red-600 text-xs hover:underline">
+            <button onClick={() => void deactivate(fuelType.id)} className="text-red-600 text-xs hover:underline link-btn">
               убрать
             </button>
           </div>
@@ -391,7 +391,7 @@ function AddressesSection() {
         <Button type="submit">Добавить</Button>
       </form>
       <ErrorText>{error}</ErrorText>
-      <Table head={["Адрес", "Текущий тариф", ""]}>
+      <Table stack head={["Адрес", "Текущий тариф", ""]}>
         {addresses.map((address) => {
           const showCityHeader = address.city !== lastCity;
           lastCity = address.city;
@@ -416,11 +416,11 @@ function AddressesSection() {
                 <td className="py-2 pr-4 text-right align-top whitespace-nowrap">
                   <button
                     onClick={() => setExpandedId(expandedId === address.id ? null : address.id)}
-                    className="text-sky-600 text-xs hover:underline mr-3"
+                    className="text-sky-600 text-xs hover:underline link-btn mr-3"
                   >
                     {expandedId === address.id ? "Скрыть тарифы" : "Тарифы"}
                   </button>
-                  <button onClick={() => void deactivate(address.id)} className="text-red-600 text-xs hover:underline">
+                  <button onClick={() => void deactivate(address.id)} className="text-red-600 text-xs hover:underline link-btn">
                     Убрать
                   </button>
                 </td>

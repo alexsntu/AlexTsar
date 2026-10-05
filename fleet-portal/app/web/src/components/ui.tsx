@@ -1,4 +1,8 @@
 import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
   useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
@@ -112,10 +116,45 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   );
 }
 
-export function Table({ head, children }: { head: ReactNode[]; children: ReactNode }) {
+/** Подписывает ячейки строк заголовками колонок (data-label) — на телефоне
+ * таблица со stack показывается карточками, и подпись берётся из этого
+ * атрибута (см. .stack-table в index.css). Проходит только по <tr>/<td>,
+ * лежащим прямо в children или внутри Fragment; ячейки с colSpan (пустое
+ * состояние, раскрытая форма) остаются без подписи. */
+function labelCells(children: ReactNode, head: ReactNode[]): ReactNode {
+  return Children.map(children, (child) => {
+    if (!isValidElement<{ children?: ReactNode }>(child)) return child;
+    if (child.type === Fragment) return cloneElement(child, {}, labelCells(child.props.children, head));
+    if (child.type !== "tr") return child;
+    let column = 0;
+    const cells = Children.map(child.props.children, (cell) => {
+      if (!isValidElement<{ colSpan?: number; children?: ReactNode }>(cell) || cell.type !== "td") return cell;
+      const label = head[column];
+      column += cell.props.colSpan ?? 1;
+      if (cell.props.colSpan || typeof label !== "string" || label === "") return cell;
+      // Содержимое — в одну обёртку: в карточке ячейка становится flex-строкой
+      // «подпись — значение», и без обёртки значение из нескольких кусков
+      // (дата + «заменён …») разъезжается по всей ширине.
+      return cloneElement(cell, { "data-label": label } as object, <div className="min-w-0">{cell.props.children}</div>);
+    });
+    return cloneElement(child, {}, cells);
+  });
+}
+
+export function Table({
+  head,
+  children,
+  stack = false,
+}: {
+  head: ReactNode[];
+  children: ReactNode;
+  /** Для широких таблиц: на телефоне каждая строка — карточка «подпись — значение»
+   * вместо горизонтальной прокрутки. На широком экране ничего не меняет. */
+  stack?: boolean;
+}) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
+      <table className={`min-w-full text-sm ${stack ? "stack-table" : ""}`}>
         <thead>
           <tr className="text-left text-slate-500 border-b border-slate-200">
             {head.map((h, i) => (
@@ -125,7 +164,7 @@ export function Table({ head, children }: { head: ReactNode[]; children: ReactNo
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">{children}</tbody>
+        <tbody className="divide-y divide-slate-100">{stack ? labelCells(children, head) : children}</tbody>
       </table>
     </div>
   );
