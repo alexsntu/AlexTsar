@@ -43,9 +43,11 @@ function iconFor(to: string): ReactNode {
   return <Icon>{ICONS[to.split("/").pop() ?? ""] ?? ICONS.documents}</Icon>;
 }
 
+// Активный пункт выделяем только цветом: полужирная подпись «ТО и ремонт» уже
+// не помещается в свою колонку на экране 390px и обрезается.
 function mobileItemClass(active: boolean): string {
   return `flex flex-col items-center justify-center gap-0.5 min-h-14 px-1 text-[11px] leading-tight ${
-    active ? "text-sky-700 font-semibold" : "text-slate-500"
+    active ? "text-sky-700" : "text-slate-500"
   }`;
 }
 
@@ -116,7 +118,7 @@ function MobileNav({ links }: { links: NavItem[] }) {
         {primary.map((link) => (
           <NavLink key={link.to} to={link.to} className={({ isActive }) => mobileItemClass(isActive && !moreOpen)}>
             {iconFor(link.to)}
-            <span className="truncate max-w-full">{link.label}</span>
+            <span className="whitespace-nowrap">{link.label}</span>
           </NavLink>
         ))}
         <button onClick={() => setMoreOpen((v) => !v)} className={mobileItemClass(moreOpen || restActive)} aria-expanded={moreOpen}>
