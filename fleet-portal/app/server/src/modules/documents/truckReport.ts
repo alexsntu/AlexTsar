@@ -1,5 +1,6 @@
 import type { Address, Delivery, PrismaClient } from "@prisma/client";
 import { round2 } from "../../lib/money.js";
+import { fuelSourceSuffix } from "../fuel/service.js";
 import { mskMonthRange } from "./profit.js";
 import { getMonthDeliveries } from "./queries.js";
 
@@ -156,7 +157,7 @@ export async function getTruckReport(prisma: PrismaClient, yearMonth: string, tr
         orderBy: [{ date: "asc" }, { id: "asc" }],
       }),
     ]);
-    fuel = withdrawals.map((w) => ({ date: mskDateKey(w.date), fuelTypeName: w.fuelType.name, liters: w.liters, cost: w.totalCost, odometer: w.odometer }));
+    fuel = withdrawals.map((w) => ({ date: mskDateKey(w.date), fuelTypeName: w.fuelType.name + fuelSourceSuffix(w.source), liters: w.liters, cost: w.totalCost, odometer: w.odometer }));
     maintenance = records.map((r) => ({ date: mskDateKey(r.date), type: r.type, description: r.description, cost: r.totalCost }));
   }
 

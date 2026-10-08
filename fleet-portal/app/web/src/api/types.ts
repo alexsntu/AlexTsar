@@ -73,6 +73,36 @@ export interface FuelWithdrawal {
   personalComment: string | null;
   totalCost: number;
   tripId: number | null;
+  source: FuelSource;
+  talonNominal: number | null;
+  talonCount: number | null;
+  pricePerLiter: number | null;
+}
+
+/** Откуда топливо: свой склад, выданные талоны или заправка по топливной карте. */
+export type FuelSource = "TANK" | "TALON" | "CARD";
+
+export interface FuelTalonLot {
+  id: number;
+  fuelTypeId: number;
+  fuelType?: FuelType;
+  date: string;
+  nominalLiters: number;
+  countIn: number;
+  countRemaining: number;
+  pricePerTalon: number;
+  totalAmount: number;
+  supplier: string | null;
+  comment: string | null;
+}
+
+export interface TalonBalanceRow {
+  fuelTypeId: number;
+  fuelTypeName: string;
+  nominalLiters: number;
+  count: number;
+  liters: number;
+  value: number;
 }
 
 export interface FuelBalanceRow {

@@ -6,10 +6,13 @@ import type {
   ConsumptionReport,
   FuelBalanceRow,
   FuelLot,
+  FuelSource,
+  FuelTalonLot,
   FuelType,
   FuelWithdrawal,
   InflowReport,
   Per100KmReport,
+  TalonBalanceRow,
   Truck,
 } from "../../api/types";
 import { Badge, Button, Card, ErrorText, Field, Input, Select, Table } from "../../components/ui";
@@ -38,19 +41,45 @@ function yearToRange(year: string): { from: string; to: string } {
   return { from: `${year}-01-01`, to: `${year}-12-31` };
 }
 
-function FuelBalanceStrip({ balance }: { balance: FuelBalanceRow[] | null }) {
-  if (!balance || balance.length === 0) return null;
+/** Номиналы талонов в обороте — тот же список проверяет сервер (TALON_NOMINALS). */
+const TALON_NOMINALS = [10, 20, 50];
+
+/** Талоны у нас на дизель: подставляем его в формах, чтобы не выбирать каждый раз. */
+function defaultTalonFuelTypeId(fuelTypes: FuelType[] | null): string {
+  const diesel = (fuelTypes ?? []).find((ft) => ft.name === "Дизель") ?? (fuelTypes ?? []).find((ft) => /дизел/i.test(ft.name));
+  return diesel ? String(diesel.id) : "";
+}
+
+function sourceLabel(w: FuelWithdrawal): string {
+  if (w.source === "TALON") return `Талоны: ${w.talonCount} × ${w.talonNominal} л`;
+  if (w.source === "CARD") return w.pricePerLiter != null ? `Карта, ${fmt(w.pricePerLiter)} ₽/л` : "Карта";
+  return "Склад";
+}
+
+function FuelBalanceStrip({ balance, talons }: { balance: FuelBalanceRow[] | null; talons: TalonBalanceRow[] | null }) {
+  const hasFuel = !!balance && balance.length > 0;
+  const hasTalons = !!talons && talons.length > 0;
+  if (!hasFuel && !hasTalons) return null;
   return (
     <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
       <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">
         На балансе сейчас (в наличии)
       </p>
       <div className="flex flex-wrap gap-x-6 gap-y-1.5">
-        {balance.map((row) => (
+        {(balance ?? []).map((row) => (
           <div key={row.fuelTypeId} className="flex items-baseline gap-1.5">
             <span className="text-sm text-slate-700">{row.fuelTypeName}:</span>
             <span className="text-base font-bold text-emerald-700">{fmt(row.liters)} л</span>
             <span className="text-xs text-slate-500">({fmt(row.value)} ₽)</span>
+          </div>
+        ))}
+        {(talons ?? []).map((row) => (
+          <div key={`${row.fuelTypeId}:${row.nominalLiters}`} className="flex items-baseline gap-1.5">
+            <span className="text-sm text-slate-700">Талоны {row.nominalLiters} л:</span>
+            <span className="text-base font-bold text-emerald-700">{row.count} шт.</span>
+            <span className="text-xs text-slate-500">
+              ({fmt(row.liters)} л, {fmt(row.value)} ₽)
+            </span>
           </div>
         ))}
       </div>
@@ -62,6 +91,7 @@ function LotsSection() {
   const { data: fuelTypes } = useApi<FuelType[]>("/api/fuel-types");
   const { data: lots, reload } = useApi<FuelLot[]>("/api/fuel/lots");
   const { data: balance, reload: reloadBalance } = useApi<FuelBalanceRow[]>("/api/fuel/reports/balance");
+  const { data: talonBalance, reload: reloadTalonBalance } = useApi<TalonBalanceRow[]>("/api/fuel/reports/talon-balance");
 
   const [fuelTypeId, setFuelTypeId] = useState("");
   const [date, setDate] = useState(() => todayLocalDateString());
@@ -96,7 +126,7 @@ function LotsSection() {
   return (
     <div>
       {/* Баланс и дашборд видны всегда; форма добавления и журнал партий — по клику, чтобы не отвлекали. */}
-      <FuelBalanceStrip balance={balance} />
+      <FuelBalanceStrip balance={balance} talons={talonBalance} />
       <InOutDashboard />
       <Card title="Приход топлива" collapsible>
         <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
@@ -153,7 +183,124 @@ function LotsSection() {
           ))}
         </Table>
       </Card>
+      <TalonLotsCard fuelTypes={fuelTypes} onChanged={reloadTalonBalance} />
     </div>
+  );
+}
+
+function TalonLotsCard({ fuelTypes, onChanged }: { fuelTypes: FuelType[] | null; onChanged: () => Promise<void> | void }) {
+  const { data: lots, reload } = useApi<FuelTalonLot[]>("/api/fuel/talon-lots");
+
+  const [fuelTypeId, setFuelTypeId] = useState("");
+  const [date, setDate] = useState(() => todayLocalDateString());
+  const [nominal, setNominal] = useState("20");
+  const [count, setCount] = useState("");
+  const [pricePerTalon, setPricePerTalon] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [supplier, setSupplier] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const selectedFuelTypeId = fuelTypeId || defaultTalonFuelTypeId(fuelTypes);
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await api.post("/api/fuel/talon-lots", {
+        fuelTypeId: Number(selectedFuelTypeId),
+        date,
+        nominalLiters: Number(nominal),
+        count: Number(count),
+        pricePerTalon: pricePerTalon ? Number(pricePerTalon) : undefined,
+        totalAmount: totalAmount ? Number(totalAmount) : undefined,
+        supplier: supplier || undefined,
+      });
+      setCount("");
+      setPricePerTalon("");
+      setTotalAmount("");
+      setSupplier("");
+      await Promise.all([reload(), onChanged()]);
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Card title="Приход талонов" collapsible>
+      <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
+        <div className="w-full sm:w-40">
+          <Field label="Вид топлива">
+            <Select value={selectedFuelTypeId} onChange={(e) => setFuelTypeId(e.target.value)} required>
+              <option value="">—</option>
+              {(fuelTypes ?? []).map((ft) => (
+                <option key={ft.id} value={ft.id}>
+                  {ft.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <div className="w-full sm:w-36">
+          <Field label="Дата">
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </Field>
+        </div>
+        <div className="w-full sm:w-28">
+          <Field label="Номинал">
+            <Select value={nominal} onChange={(e) => setNominal(e.target.value)} required>
+              {TALON_NOMINALS.map((n) => (
+                <option key={n} value={n}>
+                  {n} л
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <div className="w-full sm:w-28">
+          <Field label="Количество, шт.">
+            <Input type="number" min="1" step="1" value={count} onChange={(e) => setCount(e.target.value)} required />
+          </Field>
+        </div>
+        <div className="w-full sm:w-32">
+          <Field label="Цена за талон">
+            <Input type="number" min="0" step="0.01" value={pricePerTalon} onChange={(e) => setPricePerTalon(e.target.value)} />
+          </Field>
+        </div>
+        <div className="w-full sm:w-32">
+          <Field label="Или сумма">
+            <Input type="number" min="0" step="0.01" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} />
+          </Field>
+        </div>
+        <div className="w-full sm:w-40">
+          <Field label="Поставщик">
+            <Input value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+          </Field>
+        </div>
+        <Button type="submit" disabled={submitting}>
+          Добавить талоны
+        </Button>
+      </form>
+      <ErrorText>{error}</ErrorText>
+      <Table stack head={["Дата", "Номинал", "Приход, шт.", "Цена/талон", "Сумма", "Остаток, шт."]}>
+        {(lots ?? []).map((lot) => (
+          <tr key={lot.id}>
+            <td className="py-2 pr-4">{formatShortDate(lot.date)}</td>
+            <td className="py-2 pr-4">
+              {lot.nominalLiters} л{lot.fuelType ? `, ${lot.fuelType.name}` : ""}
+            </td>
+            <td className="py-2 pr-4">{lot.countIn}</td>
+            <td className="py-2 pr-4">{fmt(lot.pricePerTalon)}</td>
+            <td className="py-2 pr-4">{fmt(lot.totalAmount)}</td>
+            <td className="py-2 pr-4">{lot.countRemaining}</td>
+          </tr>
+        ))}
+      </Table>
+      {lots && lots.length === 0 && <p className="text-sm text-slate-500">Талоны ещё не приходовались</p>}
+    </Card>
   );
 }
 
@@ -285,10 +432,11 @@ function FuelDashboard() {
       {selectedTruckId ? (
         truckDetails && (
           <>
-            <Table head={["Дата", "Литры", "Сумма, ₽", "Одометр"]}>
+            <Table head={["Дата", "Источник", "Литры", "Сумма, ₽", "Одометр"]}>
               {truckDetails.map((w) => (
                 <tr key={w.id}>
                   <td className="py-2 pr-4">{formatShortDate(w.date)}</td>
+                  <td className="py-2 pr-4">{sourceLabel(w)}</td>
                   <td className="py-2 pr-4">{fmt(w.liters)}</td>
                   <td className="py-2 pr-4">{fmt(w.totalCost)} ₽</td>
                   <td className="py-2 pr-4">{w.odometer != null ? `${fmt(w.odometer)} км` : "—"}</td>
@@ -365,7 +513,8 @@ function InOutDashboard() {
     Promise.all([
       api.get<InflowReport>(`/api/fuel/reports/inflow?${new URLSearchParams({ from: period.from, to: period.to })}`),
       api.get<ConsumptionReport>(
-        `/api/fuel/reports/consumption?${new URLSearchParams({ groupBy: "fuelType", from: period.from, to: period.to })}`,
+        // Только склад: талоны и карта на склад не поступают, и «ушедшими» с него считаться не должны.
+        `/api/fuel/reports/consumption?${new URLSearchParams({ groupBy: "fuelType", source: "TANK", from: period.from, to: period.to })}`,
       ),
       api.get<FuelLot[]>(`/api/fuel/lots?${new URLSearchParams({ from: period.from, to: period.to })}`),
     ])
@@ -409,7 +558,7 @@ function InOutDashboard() {
   const totalOutCost = (outflow?.totals.companyCost ?? 0) + (outflow?.totals.personalCost ?? 0);
 
   return (
-    <Card title="Приход и расход топлива за период">
+    <Card title="Склад: приход и расход топлива за период">
       <PeriodModeSelector state={period} />
       <ErrorText>{error}</ErrorText>
       {(inflow || outflow) && (
@@ -469,6 +618,7 @@ function WithdrawalsSection() {
   const { data: fuelTypes } = useApi<FuelType[]>("/api/fuel-types");
   const { data: trucks } = useApi<Truck[]>("/api/trucks");
   const { data: balance, reload: reloadBalance } = useApi<FuelBalanceRow[]>("/api/fuel/reports/balance");
+  const { data: talonBalance, reload: reloadTalonBalance } = useApi<TalonBalanceRow[]>("/api/fuel/reports/talon-balance");
 
   // Фильтр журнала заправок ниже — по машине и/или месяцу; пусто = без фильтра.
   const [filterTruckId, setFilterTruckId] = useState("");
@@ -483,10 +633,16 @@ function WithdrawalsSection() {
   const withdrawalsPath = `/api/fuel/withdrawals${withdrawalsQuery.toString() ? `?${withdrawalsQuery.toString()}` : ""}`;
   const { data: withdrawals, reload } = useApi<FuelWithdrawal[]>(withdrawalsPath);
 
-  const [fuelTypeId, setFuelTypeId] = useState("");
+  // Чем заправляем: со своего склада, выданными талонами или по топливной карте.
+  const [source, setSource] = useState<FuelSource>("TANK");
+  const [chosenFuelTypeId, setFuelTypeId] = useState("");
   const [date, setDate] = useState(() => todayLocalDateString());
   const [liters, setLiters] = useState("");
-  const [isPersonal, setIsPersonal] = useState(false);
+  const [talonNominal, setTalonNominal] = useState("20");
+  const [talonCount, setTalonCount] = useState("");
+  const [pricePerLiter, setPricePerLiter] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [isPersonalChoice, setIsPersonal] = useState(false);
   const [truckId, setTruckId] = useState("");
   const [odometer, setOdometer] = useState("");
   const [personalComment, setPersonalComment] = useState("");
@@ -496,31 +652,58 @@ function WithdrawalsSection() {
   // (двойной клик, ретрай при обрыве связи) не спишет топливо дважды.
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
 
+  // Талоны и карта — только на служебную машину; талоны по умолчанию на дизель.
+  const isPersonal = source === "TANK" && isPersonalChoice;
+  const fuelTypeId = chosenFuelTypeId || (source === "TALON" ? defaultTalonFuelTypeId(fuelTypes) : "");
+  const talonLiters = Number(talonNominal) * Number(talonCount || 0);
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (submitting) return;
     setError(null);
     setSubmitting(true);
     try {
-      await api.post("/api/fuel/withdrawals", {
-        fuelTypeId: Number(fuelTypeId),
-        date,
-        liters: Number(liters),
-        isPersonal,
-        truckId: isPersonal ? undefined : Number(truckId),
-        odometer: !isPersonal && odometer ? Number(odometer) : undefined,
-        personalComment: isPersonal ? personalComment : undefined,
-        idempotencyKey,
-      });
-      const recipient = isPersonal
-        ? `личное авто (${personalComment})`
-        : trucks?.find((t) => String(t.id) === truckId)?.name ?? "машина";
+      const truckName = trucks?.find((t) => String(t.id) === truckId)?.name ?? "машина";
+      const common = { fuelTypeId: Number(fuelTypeId), date, idempotencyKey };
+      const truckFields = { truckId: Number(truckId), odometer: odometer ? Number(odometer) : undefined };
+      let message: string;
+      if (source === "TALON") {
+        await api.post("/api/fuel/talon-issues", {
+          ...common,
+          ...truckFields,
+          nominalLiters: Number(talonNominal),
+          count: Number(talonCount),
+        });
+        message = `Талоны выданы: ${talonCount} × ${talonNominal} л (${talonLiters} л), ${truckName}`;
+      } else if (source === "CARD") {
+        await api.post("/api/fuel/card-refuels", {
+          ...common,
+          ...truckFields,
+          liters: Number(liters),
+          pricePerLiter: pricePerLiter ? Number(pricePerLiter) : undefined,
+          totalAmount: totalAmount ? Number(totalAmount) : undefined,
+        });
+        message = `Заправка по карте добавлена: ${liters} л, ${truckName}`;
+      } else {
+        await api.post("/api/fuel/withdrawals", {
+          ...common,
+          liters: Number(liters),
+          isPersonal,
+          truckId: isPersonal ? undefined : Number(truckId),
+          odometer: !isPersonal && odometer ? Number(odometer) : undefined,
+          personalComment: isPersonal ? personalComment : undefined,
+        });
+        message = `Заправка добавлена: ${liters} л, ${isPersonal ? `личное авто (${personalComment})` : truckName}`;
+      }
       setLiters("");
+      setTalonCount("");
+      setPricePerLiter("");
+      setTotalAmount("");
       setOdometer("");
       setPersonalComment("");
       setIdempotencyKey(crypto.randomUUID());
-      await Promise.all([reload(), reloadBalance()]);
-      window.alert(`Заправка добавлена: ${liters} л, ${recipient}`);
+      await Promise.all([reload(), reloadBalance(), reloadTalonBalance()]);
+      window.alert(message);
     } catch (err) {
       setError(describeError(err));
     } finally {
@@ -528,12 +711,33 @@ function WithdrawalsSection() {
     }
   }
 
+  async function handleCancel(w: FuelWithdrawal) {
+    const what = w.source === "TALON" ? "выдачу талонов (они вернутся в остаток)" : "заправку по карте";
+    if (!window.confirm(`Отменить ${what} от ${formatShortDate(w.date)} на ${fmt(w.totalCost)} ₽?`)) return;
+    setError(null);
+    try {
+      await api.delete(`/api/fuel/withdrawals/${w.id}`);
+      await Promise.all([reload(), reloadTalonBalance()]);
+    } catch (err) {
+      setError(describeError(err));
+    }
+  }
+
   return (
     <div>
-      <FuelBalanceStrip balance={balance} />
+      <FuelBalanceStrip balance={balance} talons={talonBalance} />
       <FuelDashboard />
-      <Card title="Заправка (списание топлива)" collapsible>
+      <Card title="Заправка: со склада, талонами или по карте" collapsible>
       <form onSubmit={handleSubmit} className="flex gap-2 items-end mb-4 flex-wrap">
+        <div className="w-full sm:w-44">
+          <Field label="Чем заправляем">
+            <Select value={source} onChange={(e) => setSource(e.target.value as FuelSource)}>
+              <option value="TANK">Со склада</option>
+              <option value="TALON">Талонами</option>
+              <option value="CARD">По топливной карте</option>
+            </Select>
+          </Field>
+        </div>
         <div className="w-full sm:w-40">
           <Field label="Вид топлива">
             <Select value={fuelTypeId} onChange={(e) => setFuelTypeId(e.target.value)} required>
@@ -551,19 +755,56 @@ function WithdrawalsSection() {
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </Field>
         </div>
-        <div className="w-full sm:w-28">
-          <Field label="Литры">
-            <Input type="number" min="0" step="0.01" value={liters} onChange={(e) => setLiters(e.target.value)} required />
-          </Field>
-        </div>
-        <div className="w-full sm:w-44">
-          <Field label="Получатель">
-            <Select value={isPersonal ? "personal" : "truck"} onChange={(e) => setIsPersonal(e.target.value === "personal")}>
-              <option value="truck">Служебный транспорт</option>
-              <option value="personal">Личное авто</option>
-            </Select>
-          </Field>
-        </div>
+        {source === "TALON" ? (
+          <>
+            <div className="w-full sm:w-28">
+              <Field label="Номинал">
+                <Select value={talonNominal} onChange={(e) => setTalonNominal(e.target.value)} required>
+                  {TALON_NOMINALS.map((n) => (
+                    <option key={n} value={n}>
+                      {n} л
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <div className="w-full sm:w-32">
+              <Field label="Талонов, шт.">
+                <Input type="number" min="1" step="1" value={talonCount} onChange={(e) => setTalonCount(e.target.value)} required />
+              </Field>
+            </div>
+          </>
+        ) : (
+          <div className="w-full sm:w-28">
+            <Field label="Литры">
+              <Input type="number" min="0" step="0.01" value={liters} onChange={(e) => setLiters(e.target.value)} required />
+            </Field>
+          </div>
+        )}
+        {source === "CARD" && (
+          <>
+            <div className="w-full sm:w-32">
+              <Field label="Цена за литр">
+                <Input type="number" min="0" step="0.01" value={pricePerLiter} onChange={(e) => setPricePerLiter(e.target.value)} />
+              </Field>
+            </div>
+            <div className="w-full sm:w-32">
+              <Field label="Или сумма">
+                <Input type="number" min="0" step="0.01" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} />
+              </Field>
+            </div>
+          </>
+        )}
+        {source === "TANK" && (
+          <div className="w-full sm:w-44">
+            <Field label="Получатель">
+              <Select value={isPersonal ? "personal" : "truck"} onChange={(e) => setIsPersonal(e.target.value === "personal")}>
+                <option value="truck">Служебный транспорт</option>
+                <option value="personal">Личное авто</option>
+              </Select>
+            </Field>
+          </div>
+        )}
         {isPersonal ? (
           <div className="w-full sm:w-64">
             <Field label="Чьё авто (комментарий)">
@@ -592,7 +833,7 @@ function WithdrawalsSection() {
           </>
         )}
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Заправляем…" : "Заправить"}
+          {submitting ? "Сохраняем…" : source === "TALON" ? `Выдать талоны${talonLiters > 0 ? ` (${talonLiters} л)` : ""}` : source === "CARD" ? "Записать заправку" : "Заправить"}
         </Button>
       </form>
       <ErrorText>{error}</ErrorText>
@@ -627,11 +868,12 @@ function WithdrawalsSection() {
           </Button>
         )}
       </div>
-      <Table stack head={["Дата", "Вид топлива", "Литры", "Сумма", "Получатель"]}>
+      <Table stack head={["Дата", "Вид топлива", "Источник", "Литры", "Сумма", "Получатель", ""]}>
         {(withdrawals ?? []).map((w) => (
           <tr key={w.id}>
             <td className="py-2 pr-4">{formatShortDate(w.date)}</td>
             <td className="py-2 pr-4">{w.fuelType?.name}</td>
+            <td className="py-2 pr-4">{sourceLabel(w)}</td>
             <td className="py-2 pr-4">{fmt(w.liters)}</td>
             <td className="py-2 pr-4">{fmt(w.totalCost)}</td>
             <td className="py-2 pr-4">
@@ -641,6 +883,13 @@ function WithdrawalsSection() {
                 <Badge tone="green">
                   {w.truck?.name} ({w.truck?.plateNumber})
                 </Badge>
+              )}
+            </td>
+            <td className="py-2">
+              {w.source !== "TANK" && (
+                <button onClick={() => void handleCancel(w)} className="text-red-600 text-xs hover:underline link-btn">
+                  Отменить
+                </button>
               )}
             </td>
           </tr>
@@ -653,6 +902,7 @@ function WithdrawalsSection() {
 
 function ReportsSection() {
   const { data: balance } = useApi<FuelBalanceRow[]>("/api/fuel/reports/balance");
+  const { data: talonBalance } = useApi<TalonBalanceRow[]>("/api/fuel/reports/talon-balance");
   const { data: trucks } = useApi<Truck[]>("/api/trucks");
 
   const [from, setFrom] = useState("");
@@ -704,6 +954,22 @@ function ReportsSection() {
             </tr>
           ))}
         </Table>
+      </Card>
+
+      <Card title="Текущий остаток талонов">
+        <Table head={["Номинал", "Остаток, шт.", "Это литров", "Стоимость остатка"]}>
+          {(talonBalance ?? []).map((row) => (
+            <tr key={`${row.fuelTypeId}:${row.nominalLiters}`}>
+              <td className="py-2 pr-4">
+                {row.nominalLiters} л, {row.fuelTypeName}
+              </td>
+              <td className="py-2 pr-4">{row.count}</td>
+              <td className="py-2 pr-4">{fmt(row.liters)}</td>
+              <td className="py-2 pr-4">{fmt(row.value)}</td>
+            </tr>
+          ))}
+        </Table>
+        {talonBalance && talonBalance.length === 0 && <p className="text-sm text-slate-500">Талонов в наличии нет</p>}
       </Card>
 
       <Card title="Расход топлива за период">

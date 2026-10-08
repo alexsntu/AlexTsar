@@ -42,6 +42,36 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
     }));
   });
 
+  // ---------- Текущий остаток талонов по номиналам ----------
+  fastify.get("/api/fuel/reports/talon-balance", guard, async () => {
+    const lots = await fastify.prisma.fuelTalonLot.findMany({
+      where: { countRemaining: { gt: 0 } },
+      include: { fuelType: true },
+    });
+
+    type Row = { fuelTypeId: number; fuelTypeName: string; nominalLiters: number; count: number; liters: number; value: number };
+    const rows = new Map<string, Row>();
+    for (const lot of lots) {
+      const key = `${lot.fuelTypeId}:${lot.nominalLiters}`;
+      const row = rows.get(key) ?? {
+        fuelTypeId: lot.fuelTypeId,
+        fuelTypeName: lot.fuelType.name,
+        nominalLiters: lot.nominalLiters,
+        count: 0,
+        liters: 0,
+        value: 0,
+      };
+      row.count += lot.countRemaining;
+      row.liters += lot.countRemaining * lot.nominalLiters;
+      row.value += lot.valueRemaining;
+      rows.set(key, row);
+    }
+
+    return Array.from(rows.values())
+      .map((row) => ({ ...row, value: round2(row.value) }))
+      .sort((a, b) => a.fuelTypeName.localeCompare(b.fuelTypeName, "ru") || a.nominalLiters - b.nominalLiters);
+  });
+
   // ---------- Приход за период (по видам топлива) ----------
   fastify.get("/api/fuel/reports/inflow", guard, async (request, reply) => {
     const query = periodQuerySchema.safeParse(request.query);
@@ -77,12 +107,21 @@ export default async function fuelReportsRoutes(fastify: FastifyInstance) {
   // ---------- Расход за период (бизнес vs личное) ----------
   fastify.get("/api/fuel/reports/consumption", guard, async (request, reply) => {
     const query = periodQuerySchema
-      .extend({ groupBy: z.enum(["fuelType", "truck"]).default("fuelType") })
+      .extend({
+        groupBy: z.enum(["fuelType", "truck"]).default("fuelType"),
+        // Без source — все заправки (склад, талоны, карта). С source=TANK —
+        // только движение по складу: так сводка «пришло/ушло» не показывает
+        // «ушедшим со склада» топливо, которое на склад никогда не поступало.
+        source: z.enum(["TANK", "TALON", "CARD"]).optional(),
+      })
       .safeParse(request.query);
     if (!query.success) return reply.code(400).send({ error: "invalid_query" });
 
     const withdrawals = await fastify.prisma.fuelWithdrawal.findMany({
-      where: { date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) } },
+      where: {
+        date: { gte: mskDayStart(query.data.from), lt: mskDayEnd(query.data.to) },
+        source: query.data.source,
+      },
       include: { fuelType: true, truck: true },
     });
 

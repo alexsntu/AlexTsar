@@ -3,7 +3,17 @@ import { z } from "zod";
 import { round2 } from "../../lib/money.js";
 import { mskDayStart, mskDayEnd } from "../../lib/date.js";
 import { InsufficientFuelError } from "../../lib/fifo.js";
-import { driverOwnsTruck, withdrawFuel, IdempotencyConflictError } from "./service.js";
+import {
+  cancelWithdrawal,
+  driverOwnsTruck,
+  issueTalons,
+  logCardRefuel,
+  withdrawFuel,
+  IdempotencyConflictError,
+  InsufficientTalonsError,
+  TALON_NOMINALS,
+  WithdrawalNotCancellableError,
+} from "./service.js";
 
 const lotSchema = z
   .object({
@@ -53,6 +63,69 @@ const withdrawalSchema = z
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Для служебной заправки нужно выбрать машину" });
     }
   });
+
+const talonNominalSchema = z
+  .number()
+  .int()
+  .refine((value) => (TALON_NOMINALS as readonly number[]).includes(value), {
+    message: `Номинал талона должен быть одним из: ${TALON_NOMINALS.join(", ")} л`,
+  });
+
+const talonLotSchema = z
+  .object({
+    fuelTypeId: z.number().int().positive(),
+    date: z.coerce.date(),
+    nominalLiters: talonNominalSchema,
+    count: z.number().int().positive(),
+    pricePerTalon: z.number().positive().optional(),
+    totalAmount: z.number().positive().optional(),
+    supplier: z.string().optional(),
+    comment: z.string().optional(),
+  })
+  .refine((data) => data.pricePerTalon !== undefined || data.totalAmount !== undefined, {
+    message: "Нужно указать цену за талон или общую сумму",
+  })
+  .refine(
+    (data) => {
+      if (data.pricePerTalon === undefined || data.totalAmount === undefined) return true;
+      const expected = round2(data.count * data.pricePerTalon);
+      return Math.abs(expected - round2(data.totalAmount)) <= 0.01;
+    },
+    { message: "Цена за талон и общая сумма не сходятся между собой (количество × цена ≠ сумма)" },
+  );
+
+const talonIssueSchema = z.object({
+  fuelTypeId: z.number().int().positive(),
+  date: z.coerce.date(),
+  nominalLiters: talonNominalSchema,
+  count: z.number().int().positive(),
+  truckId: z.number().int().positive(),
+  odometer: z.number().positive().optional(),
+  idempotencyKey: z.string().min(10).max(100).optional(),
+});
+
+const cardRefuelSchema = z
+  .object({
+    fuelTypeId: z.number().int().positive(),
+    date: z.coerce.date(),
+    liters: z.number().positive(),
+    pricePerLiter: z.number().positive().optional(),
+    totalAmount: z.number().positive().optional(),
+    truckId: z.number().int().positive(),
+    odometer: z.number().positive().optional(),
+    idempotencyKey: z.string().min(10).max(100).optional(),
+  })
+  .refine((data) => data.pricePerLiter !== undefined || data.totalAmount !== undefined, {
+    message: "Нужно указать цену за литр или общую сумму",
+  })
+  .refine(
+    (data) => {
+      if (data.pricePerLiter === undefined || data.totalAmount === undefined) return true;
+      const expected = round2(data.liters * data.pricePerLiter);
+      return Math.abs(expected - round2(data.totalAmount)) <= 0.01;
+    },
+    { message: "Цена за литр и общая сумма не сходятся между собой (литры × цена ≠ сумма)" },
+  );
 
 const listWithdrawalsQuerySchema = z.object({
   from: z.coerce.date().optional(),
@@ -111,6 +184,117 @@ export default async function fuelRoutes(fastify: FastifyInstance) {
       include: { fuelType: true },
       orderBy: [{ date: "desc" }, { id: "desc" }],
     });
+  });
+
+  // ---------- Приход талонов ----------
+  fastify.post("/api/fuel/talon-lots", writeGuard, async (request, reply) => {
+    const parsed = talonLotSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body", details: parsed.error.flatten() });
+    const data = parsed.data;
+
+    const pricePerTalon = data.pricePerTalon ?? round2(data.totalAmount! / data.count);
+    const totalAmount = round2(data.totalAmount ?? data.count * data.pricePerTalon!);
+
+    return fastify.prisma.fuelTalonLot.create({
+      data: {
+        fuelTypeId: data.fuelTypeId,
+        date: data.date,
+        nominalLiters: data.nominalLiters,
+        countIn: data.count,
+        countRemaining: data.count,
+        pricePerTalon,
+        totalAmount,
+        valueRemaining: totalAmount,
+        supplier: data.supplier,
+        comment: data.comment,
+        createdBy: request.user!.id,
+      },
+    });
+  });
+
+  fastify.get("/api/fuel/talon-lots", writeGuard, async () => {
+    return fastify.prisma.fuelTalonLot.findMany({
+      include: { fuelType: true },
+      orderBy: [{ date: "desc" }, { id: "desc" }],
+    });
+  });
+
+  // ---------- Выдача талонов на машину (сразу расход) ----------
+  fastify.post("/api/fuel/talon-issues", writeGuard, async (request, reply) => {
+    const parsed = talonIssueSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body", details: parsed.error.flatten() });
+    const data = parsed.data;
+
+    try {
+      return await issueTalons(fastify.prisma, {
+        fuelTypeId: data.fuelTypeId,
+        date: data.date,
+        nominalLiters: data.nominalLiters,
+        count: data.count,
+        truckId: data.truckId,
+        odometer: data.odometer ?? null,
+        createdBy: request.user!.id,
+        idempotencyKey: data.idempotencyKey ?? null,
+      });
+    } catch (error) {
+      if (error instanceof InsufficientTalonsError) {
+        return reply.code(409).send({
+          error: "insufficient_talons",
+          nominalLiters: error.nominalLiters,
+          available: error.available,
+          requested: error.requested,
+        });
+      }
+      if (error instanceof IdempotencyConflictError) {
+        return reply.code(409).send({ error: "idempotency_conflict" });
+      }
+      throw error;
+    }
+  });
+
+  // ---------- Заправка по топливной карте ----------
+  fastify.post("/api/fuel/card-refuels", writeGuard, async (request, reply) => {
+    const parsed = cardRefuelSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body", details: parsed.error.flatten() });
+    const data = parsed.data;
+
+    const pricePerLiter = data.pricePerLiter ?? round2(data.totalAmount! / data.liters);
+    const totalCost = round2(data.totalAmount ?? data.liters * data.pricePerLiter!);
+
+    try {
+      return await logCardRefuel(fastify.prisma, {
+        fuelTypeId: data.fuelTypeId,
+        date: data.date,
+        liters: data.liters,
+        pricePerLiter,
+        totalCost,
+        truckId: data.truckId,
+        odometer: data.odometer ?? null,
+        createdBy: request.user!.id,
+        idempotencyKey: data.idempotencyKey ?? null,
+      });
+    } catch (error) {
+      if (error instanceof IdempotencyConflictError) {
+        return reply.code(409).send({ error: "idempotency_conflict" });
+      }
+      throw error;
+    }
+  });
+
+  // ---------- Отмена выдачи талонов / заправки по карте ----------
+  fastify.delete<{ Params: { id: string } }>("/api/fuel/withdrawals/:id", writeGuard, async (request, reply) => {
+    const id = Number(request.params.id);
+    if (!Number.isInteger(id) || id <= 0) return reply.code(400).send({ error: "invalid_id" });
+    try {
+      const cancelled = await cancelWithdrawal(fastify.prisma, id);
+      if (!cancelled) return reply.code(404).send({ error: "not_found" });
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof WithdrawalNotCancellableError) {
+        return reply.code(409).send({ error: "tank_withdrawal_not_cancellable" });
+      }
+      throw error;
+    }
   });
 
   // ---------- Заправка / списание ----------

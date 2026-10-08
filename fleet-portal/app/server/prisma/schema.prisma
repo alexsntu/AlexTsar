@@ -60,6 +60,7 @@ model FuelType {
   name        String           @unique
   isActive    Boolean          @default(true)
   lots        FuelLot[]
+  talonLots   FuelTalonLot[]
   withdrawals FuelWithdrawal[]
   createdAt   DateTime         @default(now())
 }
@@ -107,7 +108,19 @@ model FuelWithdrawal {
   createdAt       DateTime @default(now())
   tripId          Int?
   trip            Trip?    @relation(fields: [tripId], references: [id])
+  // Откуда топливо: TANK — со своего склада (FIFO по FuelLot), TALON — по
+  // выданным талонам (FIFO по FuelTalonLot, расход признаётся в момент
+  // выдачи), CARD — заправка по топливной карте (склада нет, цена вводится
+  // при заправке). Все три — обычные расходы топлива: отчёты и «Прибыль»
+  // читают их из этой же таблицы.
+  source          String   @default("TANK")
+  // Только для TALON: номинал и количество выданных талонов (liters = их произведение).
+  talonNominal    Int?
+  talonCount      Int?
+  // Только для CARD: цена за литр на АЗС.
+  pricePerLiter   Float?
   lotUsages       FuelWithdrawalLotUsage[]
+  talonUsages     FuelTalonUsage[]
 
   @@index([date, fuelTypeId, truckId])
 }
@@ -120,6 +133,42 @@ model FuelWithdrawalLotUsage {
   lotId              Int
   litersUsed         Float
   pricePerLiterAtUse Float
+}
+
+// Приход талонов на топливо: партия одинаковых талонов одного номинала.
+// Учёт в штуках; стоимость списывается по FIFO так же, как у FuelLot
+// (valueRemaining — сколько от totalAmount ещё не отнесено на выдачи).
+model FuelTalonLot {
+  id             Int      @id @default(autoincrement())
+  fuelType       FuelType @relation(fields: [fuelTypeId], references: [id])
+  fuelTypeId     Int
+  date           DateTime
+  nominalLiters  Int
+  countIn        Int
+  countRemaining Int
+  pricePerTalon  Float
+  totalAmount    Float
+  valueRemaining Float
+  supplier       String?
+  comment        String?
+  createdBy      Int
+  createdAt      DateTime @default(now())
+  usages         FuelTalonUsage[]
+
+  @@index([fuelTypeId, nominalLiters, date])
+}
+
+model FuelTalonUsage {
+  id                 Int            @id @default(autoincrement())
+  withdrawal         FuelWithdrawal @relation(fields: [withdrawalId], references: [id])
+  withdrawalId       Int
+  lot                FuelTalonLot   @relation(fields: [lotId], references: [id])
+  lotId              Int
+  countUsed          Int
+  pricePerTalonAtUse Float
+  // Фактическая стоимость этой порции — нужна, чтобы при отмене выдачи
+  // вернуть в партию ровно ту сумму, которая была с неё списана.
+  cost               Float
 }
 
 model Trip {
