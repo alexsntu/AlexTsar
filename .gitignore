@@ -7,3 +7,6 @@ fleet-portal/frappe_docker/
 # служебное
 .DS_Store
 *.log
+
+# бэкапы сервера: база и секреты, в git не попадают
+backups/
