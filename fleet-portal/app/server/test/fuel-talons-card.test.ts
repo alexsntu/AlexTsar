@@ -158,6 +158,15 @@ describe("талоны на топливо", () => {
     expect(await prisma.fuelTalonLot.count()).toBe(0);
   });
 
+  it("отклоняет цену за литр, введённую вместо цены за талон", async () => {
+    // Реальная ошибка: талон 20 л внесли по 88 ₽ (цена литра) вместо 1760 ₽.
+    expect((await addTalons("2026-10-01", 20, 25, { pricePerTalon: 88 })).statusCode).toBe(400);
+    expect((await addTalons("2026-10-01", 20, 25, { totalAmount: 2200 })).statusCode).toBe(400);
+    expect(await prisma.fuelTalonLot.count()).toBe(0);
+    expect((await addTalons("2026-10-01", 20, 25, { pricePerTalon: 1760 })).statusCode).toBe(200);
+    expect((await addTalons("2026-10-01", 10, 1, { pricePerTalon: 600 })).statusCode).toBe(200);
+  });
+
   it("повторная отправка с тем же ключом не выдаёт талоны второй раз", async () => {
     await addTalons("2026-10-01", 20, 10, { pricePerTalon: 1300 });
     const key = "talon-key-0000000001";

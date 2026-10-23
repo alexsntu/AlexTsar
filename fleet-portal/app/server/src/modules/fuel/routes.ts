@@ -64,6 +64,9 @@ const withdrawalSchema = z
     }
   });
 
+/** Ниже этой цены за литр цена талона считается ошибкой ввода (см. talonLotSchema). */
+const MIN_TALON_PRICE_PER_LITER = 30;
+
 const talonNominalSchema = z
   .number()
   .int()
@@ -92,7 +95,21 @@ const talonLotSchema = z
       return Math.abs(expected - round2(data.totalAmount)) <= 0.01;
     },
     { message: "Цена за талон и общая сумма не сходятся между собой (количество × цена ≠ сумма)" },
-  );
+  )
+  .superRefine((data, ctx) => {
+    // Частая ошибка ввода — цена за литр вместо цены за талон (88 ₽ вместо
+    // 1760 ₽ за талон 20 л). Литр топлива дешевле этого порога не бывает.
+    const pricePerTalon = data.pricePerTalon ?? data.totalAmount! / data.count;
+    const perLiter = pricePerTalon / data.nominalLiters;
+    if (perLiter < MIN_TALON_PRICE_PER_LITER) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          `Цена за талон ${round2(pricePerTalon)} ₽ — это ${round2(perLiter)} ₽ за литр, так не бывает. ` +
+          `Похоже, указана цена за литр: за талон ${data.nominalLiters} л это было бы ${round2(pricePerTalon * data.nominalLiters)} ₽`,
+      });
+    }
+  });
 
 const talonIssueSchema = z.object({
   fuelTypeId: z.number().int().positive(),

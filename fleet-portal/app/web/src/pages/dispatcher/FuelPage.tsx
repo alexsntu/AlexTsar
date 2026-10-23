@@ -43,6 +43,8 @@ function yearToRange(year: string): { from: string; to: string } {
 
 /** Номиналы талонов в обороте — тот же список проверяет сервер (TALON_NOMINALS). */
 const TALON_NOMINALS = [10, 20, 50];
+/** Тот же порог проверяет сервер: дешевле — значит, вместо цены за талон ввели цену за литр. */
+const MIN_TALON_PRICE_PER_LITER = 30;
 
 /** Талоны у нас на дизель: подставляем его в формах, чтобы не выбирать каждый раз. */
 function defaultTalonFuelTypeId(fuelTypes: FuelType[] | null): string {
@@ -196,16 +198,25 @@ function TalonLotsCard({ fuelTypes, onChanged }: { fuelTypes: FuelType[] | null;
   const [nominal, setNominal] = useState("20");
   const [count, setCount] = useState("");
   const [pricePerTalon, setPricePerTalon] = useState("");
-  const [totalAmount, setTotalAmount] = useState("");
   const [supplier, setSupplier] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const selectedFuelTypeId = fuelTypeId || defaultTalonFuelTypeId(fuelTypes);
+  const price = Number(pricePerTalon);
+  const pricePerLiter = price > 0 ? price / Number(nominal) : null;
+  const lotTotal = price > 0 && Number(count) > 0 ? price * Number(count) : null;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (submitting) return;
     setError(null);
+    if (pricePerLiter !== null && pricePerLiter < MIN_TALON_PRICE_PER_LITER) {
+      setError(
+        `Цена за талон ${fmt(price)} ₽ — это ${fmt(pricePerLiter)} ₽ за литр, так не бывает. ` +
+          `Похоже, указана цена за литр: за талон ${nominal} л это было бы ${fmt(price * Number(nominal))} ₽`,
+      );
+      return;
+    }
     setSubmitting(true);
     try {
       await api.post("/api/fuel/talon-lots", {
@@ -213,13 +224,11 @@ function TalonLotsCard({ fuelTypes, onChanged }: { fuelTypes: FuelType[] | null;
         date,
         nominalLiters: Number(nominal),
         count: Number(count),
-        pricePerTalon: pricePerTalon ? Number(pricePerTalon) : undefined,
-        totalAmount: totalAmount ? Number(totalAmount) : undefined,
+        pricePerTalon: price,
         supplier: supplier || undefined,
       });
       setCount("");
       setPricePerTalon("");
-      setTotalAmount("");
       setSupplier("");
       await Promise.all([reload(), onChanged()]);
     } catch (err) {
@@ -265,14 +274,9 @@ function TalonLotsCard({ fuelTypes, onChanged }: { fuelTypes: FuelType[] | null;
             <Input type="number" min="1" step="1" value={count} onChange={(e) => setCount(e.target.value)} required />
           </Field>
         </div>
-        <div className="w-full sm:w-32">
-          <Field label="Цена за талон">
-            <Input type="number" min="0" step="0.01" value={pricePerTalon} onChange={(e) => setPricePerTalon(e.target.value)} />
-          </Field>
-        </div>
-        <div className="w-full sm:w-32">
-          <Field label="Или сумма">
-            <Input type="number" min="0" step="0.01" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} />
+        <div className="w-full sm:w-40">
+          <Field label="Цена за 1 талон, ₽">
+            <Input type="number" min="0.01" step="0.01" value={pricePerTalon} onChange={(e) => setPricePerTalon(e.target.value)} required />
           </Field>
         </div>
         <div className="w-full sm:w-40">
@@ -284,6 +288,11 @@ function TalonLotsCard({ fuelTypes, onChanged }: { fuelTypes: FuelType[] | null;
           Добавить талоны
         </Button>
       </form>
+      {pricePerLiter !== null && (
+        <p className="text-sm text-slate-500 -mt-2 mb-3">
+          Это {fmt(pricePerLiter)} ₽ за литр{lotTotal !== null ? `, вся партия — ${fmt(lotTotal)} ₽` : ""}
+        </p>
+      )}
       <ErrorText>{error}</ErrorText>
       <Table stack head={["Дата", "Номинал", "Приход, шт.", "Цена/талон", "Сумма", "Остаток, шт."]}>
         {(lots ?? []).map((lot) => (
